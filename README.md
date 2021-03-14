@@ -1,6 +1,6 @@
 # S1-TOPS-SPLIT Analyzer
 
-This code intends to help users easily work with the S1-TOPS-SPLIT function in SNAP software by parsing the XML metadata of Sentinel-1 satellite data.
+This code intends to help users easily work with the S1-TOPS-SPLIT function in [SNAP software](https://step.esa.int/main/download/snap-download/) by parsing the XML metadata of Sentinel-1 satellite data and converting it into usable data such as shapefiles or webmaps.
 
 Using S1-TOPS-SPLIT Analyzer you are able to:
 * View all subswaths at the same time
@@ -20,7 +20,7 @@ Install Python dependencies
 Copy `TopsSplitAnalyzer.py` to your work directory. Then import the Class by typing:
 
 ```python
-from topsplitanalyser import TopsSplitAnalyser
+from topsplitanalyzer import TopsSplitAnalyzer
 ```
 
 Below is a sample of using `TopsSplitAnalyzer` to create a shapefile and visualize on a webmap. To visualize on a webmap you need to be using Jupyter Notebook.
