@@ -16,7 +16,7 @@ from typing import Union
 
 class TopsSplitAnalyzer:
 
-    def __init__(self, image: str, target_subswaths: Union[None, str, list] = None, polarization='vv', verbose=True):
+    def __init__(self, image: str, target_subswaths: Union[None, str, list] = None, polarization: str = 'vv', verbose: bool = True):
         """
         Class to interpret and visualize S1-TOPS-SPLIT data as seen in ESA SNAP software.
         
@@ -35,7 +35,7 @@ class TopsSplitAnalyzer:
             
         self._image = image
         self._target_subswath = target_subswaths
-        self.polarization = polarization
+        self.polarization = polarization.lower()
         self._verbose = verbose
 
         # Declare variables
@@ -93,7 +93,7 @@ class TopsSplitAnalyzer:
             if target_subswath in item and target_polarization in item:
                 target_file = item
         if not target_file:
-            raise Exception(f'Found no matching XML file with target subswath "{target_subswath}" and target polarization "{target_polarization}"')
+            raise Exception(f'Found no matching XML file with target subswath "{target_subswath}" and target polarization "{target_polarization}". Check TopsSplitAnalyzer.metadata_file_list for possible matches.')
 
         # Open XML
         metadata = self.archive.open(target_file)
