@@ -2,6 +2,7 @@
 # Author: Panji P. Brotoisworo
 # License: GNU GPL v3
 ###########################################
+
 import os
 import re
 from zipfile import ZipFile
@@ -15,7 +16,7 @@ from typing import Union
 
 class TopsSplitAnalyzer:
 
-    def __init__(self, image: str, target_subswath: Union[None, list] = None, polarization='vv', verbose=True):
+    def __init__(self, image: str, target_subswath: Union[None, str, list] = None, polarization='vv', verbose=True):
         """
         Class to interpret and visualize S1-TOPS-SPLIT data as seen in ESA SNAP software.
         
@@ -30,36 +31,26 @@ class TopsSplitAnalyzer:
                 raise Exception(f'Target subswath "{target_subswath.lower()}" not a valid subswath')
         if target_subswath is None:
             target_subswath = ['iw1', 'iw2', 'iw3']
+            
         self._image = image
         self._target_subswath = target_subswath
         self.polarization = polarization
         self._verbose = verbose
-
-        # Initial functions
-        self.archive = ZipFile(self._image)
-        if self._verbose:
-            print(f'Loaded ZIP file: {os.path.basename(self._image)}')
 
         # Declare variables
         self._metadata = None
         self.metadata_file_list = []
         self.total_num_bursts = None
         self.df = None
-
-    # Get metadata
-    def _load_metadata(self, target_subswath=None, target_polarization='vv'):
-        """
-        Load XML data
-        :param target_subswath: Desired subswath for metadata extraction
-        :param target_polarization: Desired polarization for metadata extraction
-        :return: ZipFle object which contains XML file to be loaded into ElementTree
-        """
-
-        if not target_subswath:
-            target_subswath = self._target_subswath
-
-        assert isinstance(target_subswath, str) is True, 'Expected string for _load_metadata'
-
+        
+        # Initial functions
+        self.archive = ZipFile(self._image)
+        self._load_metadata_paths()
+        if self._verbose:
+            print(f'Loaded ZIP file: {os.path.basename(self._image)}')
+        
+    def _load_metadata_paths(self):
+        
         # Get file list
         archive_files = self.archive.namelist()
 
@@ -74,6 +65,24 @@ class TopsSplitAnalyzer:
             match = re.search(regex_filter, item)
             if match:
                 self.metadata_file_list.append(item)
+        if not self.metadata_file_list:
+            raise Exception(f'No metadata files found in {os.path.basename(self._image)}')
+
+    # Get metadata
+    def _load_metadata(self, target_subswath=None, target_polarization=None):
+        """
+        Load XML data
+        :param target_subswath: Desired subswath for metadata extraction
+        :param target_polarization: Desired polarization for metadata extraction
+        :return: ZipFle object which contains XML file to be loaded into ElementTree
+        """
+
+        if not target_subswath:
+            target_subswath = self._target_subswath
+        if not target_polarization:
+            target_polarization = self.polarization
+
+        assert isinstance(target_subswath, str) is True, f'Expected string for  target_subswath for _load_metadata. Got {target_subswath}'
 
         target_file = None
         for item in self.metadata_file_list:
@@ -168,7 +177,7 @@ class TopsSplitAnalyzer:
                 df.columns = ['subswath', 'burst', 'geometry']
                 df_all = gpd.GeoDataFrame(pd.concat([df_all, df]), crs='EPSG:4326')
         else:
-            # Write one band only
+            # Write one subswath only
             self._load_metadata()
             coord_list = self._parse_location_grid()
             subswath_geom = self._parse_subswath_geometry(coord_list)
@@ -226,9 +235,7 @@ class TopsSplitAnalyzer:
             burst = item[1]['burst']
             geom = item[1]['geometry']
             info = f'SUBSWATH: {subswath}<br>Burst: {burst}'
-            # folium.GeoJson(data=geom, tooltip=info).add_to(m)
             feature = folium.GeoJson(data=geom, tooltip=info).add_to(boundary)
-            # feature.add_child()
             boundary.add_child(feature)
 
         if polygon:
