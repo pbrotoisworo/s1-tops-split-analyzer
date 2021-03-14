@@ -16,7 +16,7 @@ from typing import Union
 
 class TopsSplitAnalyzer:
 
-    def __init__(self, image: str, target_subswath: Union[None, str, list] = None, polarization='vv', verbose=True):
+    def __init__(self, image: str, target_subswaths: Union[None, str, list] = None, polarization='vv', verbose=True):
         """
         Class to interpret and visualize S1-TOPS-SPLIT data as seen in ESA SNAP software.
         
@@ -26,14 +26,15 @@ class TopsSplitAnalyzer:
         :param verbose: Print statements, defaults to True
         """
         # Load and check user inputs
-        if isinstance(target_subswath, str):
-            if target_subswath.lower() not in ['iw1', 'iw2', 'iw3']:
-                raise Exception(f'Target subswath "{target_subswath.lower()}" not a valid subswath')
-        if target_subswath is None:
-            target_subswath = ['iw1', 'iw2', 'iw3']
+        if isinstance(target_subswaths, str):
+            if target_subswaths.lower() not in ['iw1', 'iw2', 'iw3']:
+                raise Exception(f'Target subswath "{target_subswaths.lower()}" not a valid subswath')
+        if target_subswaths is None:
+            # Default to all bands if no target subswath specified
+            target_subswaths = ['iw1', 'iw2', 'iw3']
             
         self._image = image
-        self._target_subswath = target_subswath
+        self._target_subswath = target_subswaths
         self.polarization = polarization
         self._verbose = verbose
 
@@ -45,9 +46,12 @@ class TopsSplitAnalyzer:
         
         # Initial functions
         self.archive = ZipFile(self._image)
-        self._load_metadata_paths()
         if self._verbose:
             print(f'Loaded ZIP file: {os.path.basename(self._image)}')
+        self._load_metadata_paths()
+        if self._verbose:
+            print(f'Found {len(self.metadata_file_list)} XML paths')
+        
         
     def _load_metadata_paths(self):
         
@@ -89,7 +93,7 @@ class TopsSplitAnalyzer:
             if target_subswath in item and target_polarization in item:
                 target_file = item
         if not target_file:
-            raise Exception('No XML metadata file found')
+            raise Exception(f'Found no matching XML file with target subswath "{target_subswath}" and target polarization "{target_polarization}"')
 
         # Open XML
         metadata = self.archive.open(target_file)
