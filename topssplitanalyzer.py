@@ -32,6 +32,8 @@ class TopsSplitAnalyzer:
         if target_subswaths is None:
             # Default to all bands if no target subswath specified
             target_subswaths = ['iw1', 'iw2', 'iw3']
+        if polarization.lower() not in ['vv', 'vh']:
+            raise Exception(f'Input polarization "{polarization}" not reocgnized. Accepted is "vv" or "vh".')
             
         self._image = image
         self._target_subswath = target_subswaths
@@ -121,7 +123,7 @@ class TopsSplitAnalyzer:
                     lines.append(line)
                     coord_list.append((float(lat), float(lon)))
         if self.total_num_bursts is None and self._verbose:
-            print(f'Loaded location grid with {len(set(lines)) - 1} bursts')
+            print(f'Loaded location grid with {len(set(lines)) - 1} bursts and {len(coord_list)} coordinates')
         self.total_num_bursts = len(set(lines)) - 1
 
         return coord_list
@@ -134,7 +136,9 @@ class TopsSplitAnalyzer:
         """
         def get_coords(index, coord_list):
             coord = coord_list[index]
-            return coord[0], coord[1]
+            assert isinstance(coord[1], float)
+            assert isinstance(coord[0], float)
+            return coord[1], coord[0]
 
         bursts_dict = {}
         top_right_idx = 0
@@ -145,13 +149,12 @@ class TopsSplitAnalyzer:
         for burst_num in range(1, self.total_num_bursts + 1):
             # Create polygon
             burst_polygon = Polygon(
-                [Point(get_coords(top_right_idx, coord_list)[1], get_coords(top_right_idx, coord_list)[0]),  # Top right
-                 Point(get_coords(top_left_idx, coord_list)[1], get_coords(top_left_idx, coord_list)[0]),  # Top left
-                 Point(get_coords(bottom_left_idx, coord_list)[1], get_coords(bottom_left_idx, coord_list)[0]),
-                 # Bottom left
-                 Point(get_coords(bottom_right_idx, coord_list)[1], get_coords(bottom_right_idx, coord_list)[0])
-                 # Bottom right
-                 ]
+                [
+                    [get_coords(top_right_idx, coord_list)[0], get_coords(top_right_idx, coord_list)[1]],  # Top right
+                    [get_coords(top_left_idx, coord_list)[0], get_coords(top_left_idx, coord_list)[1]],  # Top left
+                    [get_coords(bottom_left_idx, coord_list)[0], get_coords(bottom_left_idx, coord_list)[1]],  # Bottom left
+                    [get_coords(bottom_right_idx, coord_list)[0], get_coords(bottom_right_idx, coord_list)[1]] # Bottom right
+                ]  
             )
 
             top_right_idx += 21
@@ -190,6 +193,7 @@ class TopsSplitAnalyzer:
             df_all.columns = ['subswath', 'burst', 'geometry']
 
         self.df = df_all
+        assert self.df is not None, 'GeoDataFrame is empty'
 
     def to_json(self):
         """
