@@ -1,3 +1,7 @@
+###########################################
+# Author: Panji P. Brotoisworo
+# License: GNU GPL v3
+###########################################
 import os
 import re
 from zipfile import ZipFile
@@ -228,6 +232,8 @@ class TopsSplitAnalyzer:
             boundary.add_child(feature)
 
         if polygon:
+            if self._verbose:
+                print('Loading custom shapefile:', polygon)
             # Visualize additional polygon in red color
             style = {'fillColor': '#cc0000', 'color': '#cc0000'}
             df_mask = gpd.read_file(polygon)

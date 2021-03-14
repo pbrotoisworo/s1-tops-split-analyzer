@@ -17,10 +17,10 @@ Install Python dependencies
 `pip install pandas geopandas shapely folium`
 
 ## Usage
-Copy `topsplitanalyser.py` to your work directory. Then import the Class by typing:
+Copy `TopsSplitAnalyzer.py` to your work directory. Then import the Class by typing:
 
 ```python
-from topsplitanalyser import TopSplitAnalyser
+from topsplitanalyser import TopsSplitAnalyser
 ```
 
 Below is a sample of using `TopsSplitAnalyzer` to create a shapefile and visualize on a webmap. To visualize on a webmap you need to be using Jupyter Notebook.
