@@ -16,7 +16,7 @@ setup(
         r'tests.data1': ['*'],
     },
     install_requires=[
-        'gdal',
+        'descartes',
         'fiona',
         'geopandas',
         'folium'
