@@ -9,7 +9,7 @@ from stsa import TopsSplitAnalyzer
 
 def test_data1_all_subswaths_vv():
     
-    data1 = r'tests\data1\S1A_IW_SLC__1SDV_20201123T142458_20201123T142525_035377_042241_C054.SAFE.zip'
+    data1 = os.path.join('tests', 'data1', 'S1A_IW_SLC__1SDV_20201123T142458_20201123T142525_035377_042241_C054.SAFE.zip')
     s1 = TopsSplitAnalyzer(image=data1, target_subswaths=['iw1', 'iw2', 'iw3'], polarization='vv')
     
     ########################################################################
