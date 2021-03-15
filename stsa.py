@@ -3,15 +3,19 @@
 # License: GNU GPL v3
 ###########################################
 
+import argparse
+import json
 import os
 import re
-from zipfile import ZipFile
-import xml.etree.ElementTree as ET
-import folium
-from shapely.geometry import Polygon, Point, MultiPolygon
-import geopandas as gpd
-import pandas as pd
+import sys
 from typing import Union
+import xml.etree.ElementTree as ET
+from zipfile import ZipFile
+
+import folium
+import geopandas as gpd
+from shapely.geometry import Polygon, Point, MultiPolygon
+import pandas as pd
 
 
 class TopsSplitAnalyzer:
@@ -26,12 +30,18 @@ class TopsSplitAnalyzer:
         :param verbose: Print statements, defaults to True
         """
         # Load and check user inputs
+        if target_subswaths is None:
+            # Defaults to all bands if no target subswath specified
+            target_subswaths = ['iw1', 'iw2', 'iw3']
+        if polarization is None:
+            # Defaults to VV polarization
+            polarization = 'vv'
+        if image is None:
+            raise ValueError('No input ZIP file was detected. Check inputs.')
+        
         if isinstance(target_subswaths, str):
             if target_subswaths.lower() not in ['iw1', 'iw2', 'iw3']:
                 raise Exception(f'Target subswath "{target_subswaths.lower()}" not a valid subswath')
-        if target_subswaths is None:
-            # Default to all bands if no target subswath specified
-            target_subswaths = ['iw1', 'iw2', 'iw3']
         if polarization.lower() not in ['vv', 'vh']:
             raise Exception(f'Input polarization "{polarization}" not reocgnized. Accepted is "vv" or "vh".')
             
@@ -88,7 +98,7 @@ class TopsSplitAnalyzer:
         if not target_polarization:
             target_polarization = self.polarization
 
-        assert isinstance(target_subswath, str) is True, f'Expected string for  target_subswath for _load_metadata. Got {target_subswath}'
+        assert isinstance(target_subswath, str) is True, f'Expected string for  target_subswath for _load_metadata. Got {target_subswath} which is type {type(target_subswath)}'
 
         target_file = None
         for item in self.metadata_file_list:
@@ -195,14 +205,16 @@ class TopsSplitAnalyzer:
         self.df = df_all
         assert self.df is not None, 'GeoDataFrame is empty'
 
-    def to_json(self):
+    def to_json(self, output_file):
         """
         Returns S1-TOPS-SPLIT data in JSON format
         :return: JSON
         """
         if self.df is None:
             self._create_subswath_geometry()
-        return self.df.to_json()
+        json_data = json.loads(self.df.to_json())
+        with open(output_file, 'w') as f:
+            json.dump(json_data, f, indent=4)
 
     def to_shapefile(self, output_file):
         """
@@ -261,3 +273,34 @@ class TopsSplitAnalyzer:
         Close connection to ZIP file
         """
         self.archive.close()
+        
+if __name__ == '__main__':
+    
+    # Define CLI flags and parse inputs
+    parser = argparse.ArgumentParser(description='S-1 TOPS SPLIT Analyzer')
+    
+    main_args = parser.add_argument_group('Script Parameters')
+    main_args.add_argument('-v', help='Verbose mode', action='store_true')
+    main_args.add_argument('-zip', help='Input Sentinel-1 ZIP file')
+    
+    xml_args = parser.add_argument_group('XML Parsing Parameters')
+    xml_args.add_argument('--swaths', help='List of subswaths', nargs='*', choices=['iw1', 'iw2', 'iw3'])
+    xml_args.add_argument('-polar', help='Polarization', choices=['vv', 'vh'])
+    xml_args.add_argument('-shp', help='Output path of shapefile')
+    xml_args.add_argument('-csv', help='Output path of CSV file')
+    xml_args.add_argument('-json', help='Output path of JSON file')
+    
+    args = parser.parse_args()
+    args = vars(args)
+    
+    s1 = TopsSplitAnalyzer(image=args['zip'], target_subswaths=args['swaths'], polarization=args['polar'])
+    
+    if args['shp']:
+        print('Writing shapefile to', args['shp'])
+        s1.to_shapefile(args['shp'])
+    if args['csv']:
+        print('Writing CSV to', args['csv'])
+        s1.to_csv(args['csv'])
+    if args['json']:
+        print('Writing JSON to', args['json'])
+        s1.to_json(args['json'])
