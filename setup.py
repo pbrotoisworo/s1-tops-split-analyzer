@@ -7,13 +7,14 @@ setup(
     version=0.1,
     packages=[
         'tests',
-        r'tests.data1',
-        r'tests.data2'
+        r'tests/data1',
+        r'tests/data2'
     ],
     include_package_data=True,
     package_data={
         r'tests': ['*'],
-        r'tests.data1': ['*'],
+        r'tests/data1': ['*'],
+        r'tests/data2': ['*'],
     },
     install_requires=[
         'descartes',
