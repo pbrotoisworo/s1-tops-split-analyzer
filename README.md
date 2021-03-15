@@ -1,4 +1,4 @@
-# S-1 TOPS SPLIT Analyzer
+# S-1 TOPS SPLIT Analyzer (STSA)
 
 [![Build Status](https://travis-ci.com/pbrotoisworo/s1-tops-split-analyzer.svg?branch=main)](https://travis-ci.com/pbrotoisworo/s1-tops-split-analyzer) [![codecov](https://codecov.io/gh/pbrotoisworo/s1-tops-split-analyzer/branch/main/graph/badge.svg?token=EYS8DNVPXL)](https://codecov.io/gh/pbrotoisworo/s1-tops-split-analyzer) [![Python 3.6+](https://img.shields.io/badge/python-3.6+-blue.svg)](https://www.python.org/downloads/release/python-360/)
 
@@ -10,33 +10,56 @@ Using S-1 TOPS SPLIT Analyzer you are able to:
 * Save S1-TOPS-SPLIT data as a shapefile, JSON, or CSV
 * View and interact with S1-TOPS-SPLIT data using a webmap. In addition, you can add a polygon to visualize its extent with regards to the S1-TOPS-SPLIT data
 
-![alt](sample_webmap.png)
+Comments and feedback are welcome.
 
-## Installation
-Recommended Python version is 3.8. Minimum Python version is 3.6 but this is untested.
+# Installation
+This has been tested to work in Python versions 3.6 and above. Python dependencies are `descartes fiona folium geopandas`.
 
-Install Python dependencies
+List of dependencies is available in `requirements.txt` which can be installed used to prepare the environment using this command:
 
-`pip install pandas geopandas shapely folium`
+`pip install -r requirements.txt`
 
-## Usage
-Copy `topssplitanalyzer.py` to your work directory. Then import the Class by typing:
+# Usage
+STSA can be used in the command line and as a Python import.
+
+## Command Line
+The available flags are:
+
+| Flag     | Description                |
+| -------- |:--------------------------:|
+| -v       | Print all statements       |
+| -zip     | Path of Sentinel-1 ZIP file|
+| --swaths | List of target subswaths   |
+| -polar   | Polarization               |
+| -shp     | Path of output shapefile   |
+| -csv     | Path of output CSV file    |
+| -json    | Path of output JSON file   |
+
+Below is a sample command where user selects subswath IW2 and IW3, specifies VV polarization, and specifies output data.
+
+```bash
+python stsa.py -zip S1_image.zip --swath iw2 iw3 -polar vv -shp out_shp.shp -csv out_csv.csv -json out_json.json
+```
+
+## Python Import
+
+To use it as a module copy `stsa.py` to your work directory. Then import the Class by typing:
 
 ```python
-from topssplitanalyzer import TopsSplitAnalyzer
+from stsa import TopsSplitAnalyzer
 ```
 
 Below is a sample of using `TopsSplitAnalyzer` to create a shapefile and visualize on a webmap. To visualize on a webmap you need to be using Jupyter Notebook.
 
 ```python
 # Create object
-s1 = TopsSplitAnalyzer('S1_image.zip', target_subswaths=['iw1, iw2, iw3'])
+s1 = TopsSplitAnalyzer(image='S1_image.zip', target_subswaths=['iw1, iw2, iw3'], polarization='vh')
 
 # Write to shapefile
 s1.to_shapefile('data.shp')
 
 # Get JSON
-s1.to_json()
+s1.to_json('json_output.json')
 
 # Write to CSV
 s1.to_csv('output.csv')
@@ -44,3 +67,15 @@ s1.to_csv('output.csv')
 # Visualize on a webmap with additional polygon
 s1.visualize_webmap(polygon='mask.shp')
 ```
+
+<p align="center">
+  <img width="460" height="300" src="sample_webmap.png">
+  <br>
+  Output shown on a webmap
+</p>
+
+# Tests
+
+If you plan on contributing ensure that is passes all tests by installing `pytest` and typing this in the project directory:
+
+`pytest tests`

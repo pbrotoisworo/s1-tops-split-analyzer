@@ -7,6 +7,7 @@ import pandas as pd
 
 from stsa import TopsSplitAnalyzer
 
+# Using data1 folder
 def test_TopsSplitAnalyzer():
     
     data1 = os.path.join('tests', 'data1', 'S1A_IW_SLC__1SDV_20201123T142458_20201123T142525_035377_042241_C054.SAFE.zip')
