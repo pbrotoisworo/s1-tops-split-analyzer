@@ -33,7 +33,7 @@ def test_data1_all_subswaths_vv():
         os.path.join('tests', 'data1', 'swaths_all.cpg'),
         os.path.join('tests', 'data1', 'swaths_all.dbf'),
         os.path.join('tests', 'data1', 'swaths_all.prj'),
-        os.path.join('tests', 'data1', 'swaths_all.shp')
+        os.path.join('tests', 'data1', 'swaths_all.shp'),
         os.path.join('tests', 'data1', 'swaths_all.shx')
     ]
     s1.to_shapefile(out_shp_items[3])
