@@ -5,17 +5,9 @@ setup(
     author='Panji P. Brotoisworo',
     url='https://github.com/pbrotoisworo/s1-tops-split-analyzer',
     version=0.1,
-    packages=[
-        'tests',
-        r'tests/data1',
-        r'tests/data2'
-    ],
+    description='Interface to extract subswath data from Sentinel-1 SAR metadata'
+    packages=find_packages(),
     include_package_data=True,
-    package_data={
-        r'tests': ['*'],
-        r'tests/data1': ['*'],
-        r'tests/data2': ['*'],
-    },
     install_requires=[
         'descartes',
         'fiona',
