@@ -11,12 +11,10 @@ from stsa import TopsSplitAnalyzer
 
 global data1
 global data2
-global SCRIPT_DIR
 
 TEST_DIR = 'tests'
 data1 = os.path.join(TEST_DIR, 'data1', 'S1A_IW_SLC__1SDV_20201123T142458_20201123T142525_035377_042241_C054.SAFE.zip')
 data2 = os.path.join(TEST_DIR, 'data2', 'S1A_IW_SLC__1SDV_20200929T214701_20200929T214728_034579_04068C_4E7A.SAFE.zip')
-SCRIPT_DIR = sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 #################################################################################
 # Input tests
@@ -87,11 +85,11 @@ def test_TopsSplitAnalyzer_cli_json():
     
     out_file = r'cli_json_out.json'
     cmd = f'python stsa.py -zip {data1} -json {out_file}'
-    subprocess.Popen(cmd, cwd=SCRIPT_DIR)
+    subprocess.call(cmd, env=os.environ)
     
     expected = True
     actual = os.path.exists(out_file)
-    assert actual == expected, f'CLI did not generate expected output. Expected output file {out_file}. Current directory contents: {SCRIPT_DIR}'
+    assert actual == expected, f'CLI did not generate expected output. Expected output file {out_file}'
     os.remove(out_file)
     
 def test_TopsSplitAnalyzer_cli_shp():
@@ -100,16 +98,61 @@ def test_TopsSplitAnalyzer_cli_shp():
     out_file = r'cli_shp_out.shp'
     out_file_basename = out_file.replace('.shp', '') 
     cmd = f'python stsa.py -zip {data1} -shp {out_file}'
-    subprocess.Popen(cmd, cwd=SCRIPT_DIR)
+    subprocess.call(cmd, env=os.environ)
     
     expected = True
     actual = os.path.exists(out_file)
-    assert actual == expected, f'CLI did not generate expected output. Expected output file {out_file}. Current directory contents: {SCRIPT_DIR}'
+    assert actual == expected, f'CLI did not generate expected output. Expected output file {out_file}'
     
     os.remove(out_file_basename + '.cpg')
     os.remove(out_file_basename + '.dbf')
     os.remove(out_file_basename + '.prj')
     os.remove(out_file_basename + '.shx')
+    os.remove(out_file_basename + '.shp')
+    
+def test_TopsSplitAnalyzer_cli_csv():
+    "CLI with CSV output"
+    
+    out_file = 'cli_csv_out.csv'
+    cmd = f'python stsa.py -zip {data1} -csv {out_file}'
+    subprocess.call(cmd, env=os.environ)
+    
+    expected = True
+    actual = os.path.exists(out_file)
+    assert actual == expected, f'CLI did not generated expected output file {output_file}'
+    os.remove(out_file)
+    
+def test_TopsSplitAnalyzer_cli_subswaths():
+    "CLI with different subswath inputs"
+    
+    out_file = 'out_csv.csv'
+    
+    cmd = f'python stsa.py -zip {data1} --swaths iw1 -csv {out_file}'
+    subprocess.call(cmd, env=os.environ)
+    
+    df = pd.read_csv(out_file)
+    expected = 9
+    actual = len(df)
+    assert actual == expected, f'CSV length did not match expected output. Actual was {actual}. Expected is {expected}'
+    os.remove(out_file)
+    
+    cmd = f'python stsa.py -zip {data1} --swaths iw1 iw3 -csv {out_file}'
+    subprocess.call(cmd, env=os.environ)
+    
+    df = pd.read_csv(out_file)
+    expected = 18
+    actual = len(df)
+    assert actual == expected, f'CSV length did not match expected output. Actual was {actual}. Expected is {expected}'
+    os.remove(out_file)
+    
+    cmd = f'python stsa.py -zip {data1} --swaths iw1 iw3 iw2 -csv {out_file}'
+    subprocess.call(cmd, env=os.environ)
+    
+    df = pd.read_csv(out_file)
+    expected = 27
+    actual = len(df)
+    assert actual == expected, f'CSV length did not match expected output. Actual was {actual}. Expected is {expected}'
+    os.remove(out_file)
     
 
 #################################################################################
