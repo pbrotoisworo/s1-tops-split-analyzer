@@ -1,5 +1,7 @@
 # S-1 TOPS SPLIT Analyzer
 
+[![Build Status](https://travis-ci.com/pbrotoisworo/s1-tops-split-analyzer.svg?branch=main)](https://travis-ci.com/pbrotoisworo/s1-tops-split-analyzer)
+
 This code intends to help users easily work with the S-1 TOPS SPLIT function in [SNAP software](https://step.esa.int/main/download/snap-download/) by parsing the XML metadata of Sentinel-1 satellite data and converting it into usable data such as shapefiles or webmaps.
 
 Using S-1 TOPS SPLIT Analyzer you are able to:

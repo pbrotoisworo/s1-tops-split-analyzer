@@ -1,6 +1,8 @@
 language: python
 python:
   - "3.8"
+  - "3.7"
+  - "3.6"
 before_install:
   - python --version
   - pip install -U pip
@@ -9,6 +11,6 @@ install:
   - pip install -e .
   - pip install pytest-cov codecov
 script:
-  - pytest tests --cov=src tests
+  - pytest tests --cov=. tests
 after_success:
   - codecov
