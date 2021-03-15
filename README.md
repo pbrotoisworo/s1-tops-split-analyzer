@@ -1,6 +1,7 @@
 # S-1 TOPS SPLIT Analyzer
 
-[![Build Status](https://travis-ci.com/pbrotoisworo/s1-tops-split-analyzer.svg?branch=main)](https://travis-ci.com/pbrotoisworo/s1-tops-split-analyzer)
+[![Build Status](https://travis-ci.com/pbrotoisworo/s1-tops-split-analyzer.svg?branch=main)](https://travis-ci.com/pbrotoisworo/s1-tops-split-analyzer) [![codecov](https://codecov.io/gh/pbrotoisworo/s1-tops-split-analyzer/branch/main/graph/badge.svg?token=EYS8DNVPXL)](https://codecov.io/gh/pbrotoisworo/s1-tops-split-analyzer) [![Python 3.6+](https://img.shields.io/badge/python-3.6+-blue.svg)](https://www.python.org/downloads/release/python-360/)
+
 
 This code intends to help users easily work with the S-1 TOPS SPLIT function in [SNAP software](https://step.esa.int/main/download/snap-download/) by parsing the XML metadata of Sentinel-1 satellite data and converting it into usable data such as shapefiles or webmaps.
 
