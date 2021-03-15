@@ -1,6 +1,6 @@
 ###########################################
 # Author: Panji P. Brotoisworo
-# License: GNU GPL v3
+# License: Apache License 2.0 (Apache-2.0)
 ###########################################
 
 import argparse
@@ -38,10 +38,11 @@ class TopsSplitAnalyzer:
             polarization = 'vv'
         if image is None:
             raise ValueError('No input ZIP file was detected. Check inputs.')
-        
         if isinstance(target_subswaths, str):
             if target_subswaths.lower() not in ['iw1', 'iw2', 'iw3']:
                 raise Exception(f'Target subswath "{target_subswaths.lower()}" not a valid subswath')
+        if isinstance(target_subswaths, list):
+            target_subswaths = [x.lower() for x in target_subswaths]
         if polarization.lower() not in ['vv', 'vh']:
             raise Exception(f'Input polarization "{polarization}" not reocgnized. Accepted is "vv" or "vh".')
             
@@ -64,9 +65,10 @@ class TopsSplitAnalyzer:
         if self._verbose:
             print(f'Found {len(self.metadata_file_list)} XML paths')
         
-        
     def _load_metadata_paths(self):
-        
+        """
+        Get paths of metadata files based on RegEx string match
+        """
         # Get file list
         archive_files = self.archive.namelist()
 
@@ -179,7 +181,6 @@ class TopsSplitAnalyzer:
     def _create_subswath_geometry(self):
         """
         Create geodataframe from the XML metadata
-        :return:
         """
 
         if isinstance(self._target_subswath, list):
