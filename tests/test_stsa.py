@@ -30,11 +30,11 @@ def test_data1_all_subswaths_vv():
     ########################################################################
     
     out_shp_items = [
-        r'tests\data1\swaths_all.cpg',
-        r'tests\data1\swaths_all.dbf',
-        r'tests\data1\swaths_all.prj',
-        r'tests\data1\swaths_all.shp',
-        r'tests\data1\swaths_all.shx'
+        os.path.join('tests', 'data1', 'swaths_all.cpg'),
+        os.path.join('tests', 'data1', 'swaths_all.dbf'),
+        os.path.join('tests', 'data1', 'swaths_all.prj'),
+        os.path.join('tests', 'data1', 'swaths_all.shp')
+        os.path.join('tests', 'data1', 'swaths_all.shx')
     ]
     s1.to_shapefile(out_shp_items[3])
     for item in out_shp_items:
@@ -46,7 +46,7 @@ def test_data1_all_subswaths_vv():
     # Check JSON was generated correctly
     ########################################################################
         
-    json_out = r'tests\data1\test_json.json'
+    json_out = os.path.join('tests', 'data1', 'test_json.json')
     s1.to_json(json_out)
     
     # Read output JSON file
@@ -72,7 +72,7 @@ def test_data1_all_subswaths_vv():
     # Check CSV was generated correctly
     ########################################################################
         
-    csv_out = r'tests\data1\test_csv.csv'
+    csv_out = os.path.join('tests', 'data1', 'test_csv.csv')
     s1.to_csv(csv_out)
     
     df = pd.read_csv(csv_out)
