@@ -38,7 +38,7 @@ The available flags are:
 Below is a sample command where user selects subswath IW2 and IW3, specifies VV polarization, and specifies output data.
 
 ```bash
-python stsa.py -zip S1_image.zip --swath iw2 iw3 -polar vv -shp out_shp.shp -csv out_csv.csv -json out_json.json
+python stsa.py -zip S1_image.zip --swaths iw2 iw3 -polar vv -shp out_shp.shp -csv out_csv.csv -json out_json.json
 ```
 
 ## Python Import
