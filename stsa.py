@@ -14,7 +14,7 @@ from zipfile import ZipFile
 
 import folium
 import geopandas as gpd
-from shapely.geometry import Polygon, Point, MultiPolygon
+from shapely.geometry import Polygon
 import pandas as pd
 
 
@@ -25,9 +25,9 @@ class TopsSplitAnalyzer:
         Class to interpret and visualize S1-TOPS-SPLIT data as seen in ESA SNAP software.
         
         :param image: Path of ZIP file containing Sentinel-1 imagery
-        :param target_subswath: String or list of subswaths to load
-        :param polarization: Polarization of imagery, defaults to 'vv'
-        :param verbose: Print statements, defaults to True
+        :param target_subswath: String or list containing strings of subswaths to load. Defaults to all subswaths.
+        :param polarization: Polarization of imagery. Valid options are 'vv' or 'vh' polarizations. Defaults to 'vv'
+        :param verbose: Print statements. Defaults to True
         """
         # Load and check user inputs
         if target_subswaths is None:
@@ -40,11 +40,11 @@ class TopsSplitAnalyzer:
             raise ValueError('No input ZIP file was detected. Check inputs.')
         if isinstance(target_subswaths, str):
             if target_subswaths.lower() not in ['iw1', 'iw2', 'iw3']:
-                raise Exception(f'Target subswath "{target_subswaths.lower()}" not a valid subswath')
+                raise ValueError(f'Target subswath "{target_subswaths.lower()}" not a valid subswath')
         if isinstance(target_subswaths, list):
             target_subswaths = [x.lower() for x in target_subswaths]
         if polarization.lower() not in ['vv', 'vh']:
-            raise Exception(f'Input polarization "{polarization}" not reocgnized. Accepted is "vv" or "vh".')
+            raise ValueError(f'Input polarization "{polarization}" not reocgnized. Accepted is "vv" or "vh".')
             
         self._image = image
         self._target_subswath = target_subswaths
