@@ -6,6 +6,8 @@
 This code intends to help users easily work with the S-1 TOPS SPLIT function in [SNAP software](https://step.esa.int/main/download/snap-download/) by parsing the XML metadata of Sentinel-1 satellite data and converting it into usable data such as shapefiles or webmaps.
 
 Using S-1 TOPS SPLIT Analyzer you are able to:
+* Download XML data directly from [Copernicus Scihub](https://scihub.copernicus.eu/) and view TOPS-SPLIT data. No need to download the full 4 GB image to view the TOPS SPLIT data
+* View TOPS-SPLIT data from downloaded ZIP files containing full size Sentinel-1 imagery
 * View all subswaths at the same time
 * Save S1-TOPS-SPLIT data as a shapefile, JSON, or CSV
 * View and interact with S1-TOPS-SPLIT data using a webmap. In addition, you can add a polygon to visualize its extent with regards to the S1-TOPS-SPLIT data
@@ -13,47 +15,53 @@ Using S-1 TOPS SPLIT Analyzer you are able to:
 Comments and feedback are welcome.
 
 # Installation
-This has been tested to work in Python versions 3.6 and above. Python dependencies are `descartes fiona folium geopandas`.
 
-List of dependencies is available in `requirements.txt` which can be installed used to prepare the environment using this command:
+This has been tested to work in Python versions 3.6 to 3.9
 
-`pip install -r requirements.txt`
+**If you are using Windows you need to manually install the [GDAL](https://www.lfd.uci.edu/~gohlke/pythonlibs/#gdal) and [Fiona](https://www.lfd.uci.edu/~gohlke/pythonlibs/#fiona) wheels OR install using Anaconda**:
+
+`conda install -c conda-forge fiona`
+
+Linux or MacOS users can disregard the previous instruction. Install stsa into your environment by opening the terminal in the repo root folder and typing this command:
+
+`pip install .`
 
 # Usage
 STSA can be used in the command line and as a Python import.
 
 ## Command Line
-The available flags are:
+CLI access is available if you directly run `stsa.py`. The available flags are:
 
-| Flag     | Description                |
-| -------- |:--------------------------:|
-| -v       | Print all statements       |
-| -zip     | Path of Sentinel-1 ZIP file|
-| --swaths | List of target subswaths   |
-| -polar   | Polarization               |
-| -shp     | Path of output shapefile   |
-| -csv     | Path of output CSV file    |
-| -json    | Path of output JSON file   |
+| Flag      | Description                 |
+| --------  |:---------------------------:|
+| -v        | Print all statements        |
+| --zip     | Path of Sentinel-1 ZIP file |
+| --swaths  | List of target subswaths    |
+| --polar   | Polarization                |
+| --shp     | Path of output shapefile    |
+| --csv     | Path of output CSV file     |
+| --json    | Path of output JSON file    |
+| --api-user | Copernicus username |
+| --api-password | Copernicus password |
+| --api-scene | Sentinel-1 scene ID to download |
+| --api-folder | Folder for downloaded XML files |
 
 Below is a sample command where user selects subswath IW2 and IW3, specifies VV polarization, and specifies output data.
 
 ```bash
-python stsa.py -zip S1_image.zip --swaths iw2 iw3 -polar vv -shp out_shp.shp -csv out_csv.csv -json out_json.json
+python stsa.py --zip S1_image.zip --swaths iw2 iw3 --polar vv --shp out_shp.shp --csv out_csv.csv --json out_json.json
 ```
 
 ## Python Import
-
-To use it as a module copy `stsa.py` to your work directory. Then import the Class by typing:
-
-```python
-from stsa import TopsSplitAnalyzer
-```
 
 Below is a sample of using `TopsSplitAnalyzer` to create a shapefile and visualize on a webmap. To visualize on a webmap you need to be using Jupyter Notebook.
 
 ```python
 # Create object
-s1 = TopsSplitAnalyzer(image='S1_image.zip', target_subswaths=['iw1, iw2, iw3'], polarization='vh')
+import stsa
+
+s1 = stsa.TopsSplitAnalyzer(target_subswaths=['iw1, iw2, iw3'], polarization='vh')
+s1.load_Data(zip_path='S1_image.zip')
 
 # Write to shapefile
 s1.to_shapefile('data.shp')
