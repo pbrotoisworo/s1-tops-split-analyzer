@@ -23,6 +23,9 @@ class DownloadXML:
         self._verbose = verbose
         self._auth = HTTPBasicAuth(self._user, self._password)
         
+        if 'SLC' not in self._image:
+            raise Exception('Scene ID does not belong to an SLC image')
+        
         # Set OData API environment parameters
         os.environ['DHUS_USER'] = user
         os.environ['DHUS_PASSWORD'] = password

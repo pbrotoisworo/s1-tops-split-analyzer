@@ -129,6 +129,10 @@ class TopsSplitAnalyzer:
         """
         Get paths of metadata files based on RegEx string match
         """
+        
+        # Reset metadata list before loading
+        self.metadata_file_list = []
+        
         if self._is_downloaded_scene is False:
             # Get file list
             archive_files = self.archive.namelist()
@@ -136,8 +140,6 @@ class TopsSplitAnalyzer:
             # Get metadata files
             regex_filter = r's1(a|b)-iw\d-slc-(vv|vh)-.*\.xml'
 
-            # Reset metadata list before loading
-            self.metadata_file_list = []
             for item in archive_files:
                 if 'calibration' in item:
                     continue
