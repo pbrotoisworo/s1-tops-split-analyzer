@@ -62,7 +62,7 @@ class DownloadXML:
                 response_metadata = requests.get(url, auth=self._auth)
                 
                 # Prepare output file
-                pattern = r's1[ab]-iw\d-slc-v[vh]-\d{8}t\d{6}-\d{8}t\d{6}-\d{6}-\d{6}-\d{3}.xml'
+                pattern = r's1[ab]-iw\d-slc-v[vh]-\d{8}t\d{6}-\d{8}t\d{6}-\d{6}-.{6}-\d{3}.xml'
                 try:
                     match = re.findall(pattern, url)[0]
                 except IndexError:
