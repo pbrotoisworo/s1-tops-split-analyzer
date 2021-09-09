@@ -18,19 +18,19 @@ Comments and feedback are welcome.
 
 This has been tested to work in Python versions 3.6 to 3.9
 
-If you are using Windows you need to manually install the [GDAL](https://www.lfd.uci.edu/~gohlke/pythonlibs/#gdal) and [Fiona](https://www.lfd.uci.edu/~gohlke/pythonlibs/#fiona) wheels or install Fiona using Anaconda:
+**If you are using Windows you need to manually install the [GDAL](https://www.lfd.uci.edu/~gohlke/pythonlibs/#gdal) and [Fiona](https://www.lfd.uci.edu/~gohlke/pythonlibs/#fiona) wheels OR install using Anaconda**:
 
 `conda install -c conda-forge fiona`
 
-Linux or MacOS users can disregard the previous instruction. Once Fiona is installed, install all dependencies using this command:
+Linux or MacOS users can disregard the previous instruction. Install stsa into your environment by opening the terminal in the repo root folder and typing this command:
 
-`pip install -r requirements.txt`
+`pip install .`
 
 # Usage
 STSA can be used in the command line and as a Python import.
 
 ## Command Line
-The available flags for `stsa.py` are:
+CLI access is available if you directly run `stsa.py`. The available flags are:
 
 | Flag      | Description                 |
 | --------  |:---------------------------:|
@@ -54,17 +54,13 @@ python stsa.py --zip S1_image.zip --swaths iw2 iw3 --polar vv --shp out_shp.shp 
 
 ## Python Import
 
-To use it as a module copy `stsa.py` to your work directory. Then import the Class by typing:
-
-```python
-from stsa import TopsSplitAnalyzer
-```
-
 Below is a sample of using `TopsSplitAnalyzer` to create a shapefile and visualize on a webmap. To visualize on a webmap you need to be using Jupyter Notebook.
 
 ```python
 # Create object
-s1 = TopsSplitAnalyzer(target_subswaths=['iw1, iw2, iw3'], polarization='vh')
+import stsa
+
+s1 = stsa.TopsSplitAnalyzer(target_subswaths=['iw1, iw2, iw3'], polarization='vh')
 s1.load_Data(zip_path='S1_image.zip')
 
 # Write to shapefile

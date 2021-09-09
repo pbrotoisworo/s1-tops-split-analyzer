@@ -18,7 +18,7 @@ import geopandas as gpd
 from shapely.geometry import Polygon
 import pandas as pd
 
-from search import DownloadXML
+from .search import DownloadXML
 
 
 class TopsSplitAnalyzer:

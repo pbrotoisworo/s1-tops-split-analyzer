@@ -1,2 +1,2 @@
-from .search import DownloadXML
-from .stsa import TopsSplitAnalyzer
+from stsa.search import DownloadXML
+from stsa.stsa import TopsSplitAnalyzer
