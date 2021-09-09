@@ -2,7 +2,10 @@ import json
 import os
 import subprocess
 import sys
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+STSA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'stsa')
+sys.path.append(REPO_ROOT)
+sys.path.append(STSA_DIR)
 
 import pandas as pd
 import pytest
@@ -12,7 +15,7 @@ from stsa import TopsSplitAnalyzer
 global data1
 global data2
 
-TEST_DIR = 'tests'
+TEST_DIR = os.path.abspath('tests')
 data1 = os.path.join(TEST_DIR, 'data1', 'S1A_IW_SLC__1SDV_20201123T142458_20201123T142525_035377_042241_C054.SAFE.zip')
 data2 = os.path.join(TEST_DIR, 'data2', 'S1A_IW_SLC__1SDV_20200929T214701_20200929T214728_034579_04068C_4E7A.SAFE.zip')
 
@@ -22,21 +25,18 @@ data2 = os.path.join(TEST_DIR, 'data2', 'S1A_IW_SLC__1SDV_20200929T214701_202009
 
 def test_TopsSplitAnalyzer_string_subswath():
     
-    s1 = TopsSplitAnalyzer(image=data2, target_subswaths='iw2')
+    s1 = TopsSplitAnalyzer(target_subswaths='iw2')
+    s1.load_data(zip_path=data2)
     out_file = 'test_json.json'
     s1.to_json(out_file)
     
-    expected = True
-    actual = os.path.exists(out_file)
-    
-    assert actual == expected, 'No output detected for string input of subswath'
-    
+    assert os.path.exists(out_file), 'No output detected for string input of subswath'
     os.remove(out_file)
     
 def test_TopsSplitAnalyzer_use_defaults():
     
-    s1 = TopsSplitAnalyzer(image=data2)
-    
+    s1 = TopsSplitAnalyzer()
+    s1.load_data(zip_path=data2)
     expected = 'vv'
     actual = s1.polarization
     assert expected == actual, f'Polarization does not match. Actual is {actual}. Expected is {expected}'
@@ -48,7 +48,8 @@ def test_TopsSplitAnalyzer_use_defaults():
     
 def test_TopsSplitAnalyzer_string_caps_input():
     "Check input if in all caps"
-    s1 = TopsSplitAnalyzer(image=data2, target_subswaths=['IW1', 'IW2', 'IW3'], polarization='VV')
+    s1 = TopsSplitAnalyzer(target_subswaths=['IW1', 'IW2', 'IW3'], polarization='VV')
+    s1.load_data(zip_path=data2)
     
     expected = 'vv'
     actual = s1.polarization
@@ -68,42 +69,41 @@ def test_TopsSplitAnalyzer_string_caps_input():
 @pytest.mark.xfail
 def test_TopsSplitAnalyzer_xfail_subswath1():
     "Should fail due to improper input for subswaths"
-    s1 = TopsSplitAnalyzer(image=data2, target_subswaths=['iw1' 'iw2' 'iw3'], polarization='vv')
+    s1 = TopsSplitAnalyzer(target_subswaths=['iw1' 'iw2' 'iw3'], polarization='vv')
+    s1.load_data(zip_path=data2)
     
 @pytest.mark.xfail
 def test_TopsSplitAnalyzer_xfail_subswath2():
     "Should fail due to iw4 not being a valid subswath"
-    s1 = TopsSplitAnalyzer(image=data2, target_subswaths=['iw1', 'iw4'], polarization='vv')
+    s1 = TopsSplitAnalyzer(target_subswaths=['iw1', 'iw4'], polarization='vv')
+    s1.load_data(zip_path=data2)
     
 @pytest.mark.xfail
 def test_TopsSplitAnalyzer_xfail_invalid_polarization():
     "Should fail due to invalid polarization"
     s1 = TopsSplitAnalyzer(image=data2, polarization='HV')
+    s1.load_data(zip_path=data2)
   
 def test_TopsSplitAnalyzer_cli_json():
     "CLI with JSON output"
     
-    out_file = r'cli_json_out.json'
-    cmd = f'python stsa.py -zip {data1} -json {out_file}'.split()
-    subprocess.call(cmd)
+    out_file = os.path.join(TEST_DIR, 'cli_json_out.json')
+    cmd = f'python stsa.py --zip {data1} --json {out_file}'.split()
+    subprocess.call(cmd, cwd=STSA_DIR)
     
-    expected = True
-    actual = os.path.exists(out_file)
-    assert actual == expected, f'CLI did not generate expected output. Expected output file {out_file}'
+    assert os.path.exists(out_file), f'CLI did not generate expected output. Expected output file {out_file}'
     os.remove(out_file)
     
 def test_TopsSplitAnalyzer_cli_shp():
     "CLI with shp output"
     
-    out_file = r'cli_shp_out.shp'
+    out_file = os.path.join(TEST_DIR, 'cli_shp_out.shp')
+    cmd = f'python stsa.py --zip {data1} --shp {out_file}'.split()
+    subprocess.call(cmd, cwd=STSA_DIR)
+    
+    assert os.path.exists(out_file), f'CLI did not generate expected output. Expected output file {out_file}'
+    
     out_file_basename = out_file.replace('.shp', '') 
-    cmd = f'python stsa.py -zip {data1} -shp {out_file}'.split()
-    subprocess.call(cmd)
-    
-    expected = True
-    actual = os.path.exists(out_file)
-    assert actual == expected, f'CLI did not generate expected output. Expected output file {out_file}'
-    
     os.remove(out_file_basename + '.cpg')
     os.remove(out_file_basename + '.dbf')
     os.remove(out_file_basename + '.prj')
@@ -113,22 +113,20 @@ def test_TopsSplitAnalyzer_cli_shp():
 def test_TopsSplitAnalyzer_cli_csv():
     "CLI with CSV output"
     
-    out_file = 'cli_csv_out.csv'
-    cmd = f'python stsa.py -zip {data1} -csv {out_file}'.split()
-    subprocess.call(cmd)
+    out_file = os.path.join(TEST_DIR, 'cli_csv_out.csv')
+    cmd = f'python stsa.py --zip {data1} --csv {out_file}'.split()
+    subprocess.call(cmd, cwd=STSA_DIR)
     
-    expected = True
-    actual = os.path.exists(out_file)
-    assert actual == expected, f'CLI did not generated expected output file {output_file}'
+    assert os.path.exists(out_file), f'CLI did not generated expected output file {out_file}'
     os.remove(out_file)
     
 def test_TopsSplitAnalyzer_cli_subswaths():
     "CLI with different subswath inputs"
     
-    out_file = 'out_csv.csv'
+    out_file = os.path.join(TEST_DIR, 'out_csv.csv')
     
-    cmd = f'python stsa.py -zip {data1} --swaths iw1 -csv {out_file}'.split()
-    subprocess.call(cmd)
+    cmd = f'python stsa.py --zip {data1} --swaths iw1 --csv {out_file}'.split()
+    subprocess.call(cmd, cwd=STSA_DIR)
     
     df = pd.read_csv(out_file)
     expected = 9
@@ -136,8 +134,8 @@ def test_TopsSplitAnalyzer_cli_subswaths():
     assert actual == expected, f'CSV length did not match expected output. Actual was {actual}. Expected is {expected}'
     os.remove(out_file)
     
-    cmd = f'python stsa.py -zip {data1} --swaths iw1 iw3 -csv {out_file}'.split()
-    subprocess.call(cmd)
+    cmd = f'python stsa.py --zip {data1} --swaths iw1 iw3 --csv {out_file}'.split()
+    subprocess.call(cmd, cwd=STSA_DIR)
     
     df = pd.read_csv(out_file)
     expected = 18
@@ -145,8 +143,8 @@ def test_TopsSplitAnalyzer_cli_subswaths():
     assert actual == expected, f'CSV length did not match expected output. Actual was {actual}. Expected is {expected}'
     os.remove(out_file)
     
-    cmd = f'python stsa.py -zip {data1} --swaths iw1 iw3 iw2 -csv {out_file}'.split()
-    subprocess.call(cmd, env=os.environ)
+    cmd = f'python stsa.py --zip {data1} --swaths iw1 iw3 iw2 --csv {out_file}'.split()
+    subprocess.call(cmd, cwd=STSA_DIR)
     
     df = pd.read_csv(out_file)
     expected = 27
@@ -161,7 +159,8 @@ def test_TopsSplitAnalyzer_cli_subswaths():
 # Using data1 folder
 def test_TopsSplitAnalyzer_data1_all_vv():
     
-    s1 = TopsSplitAnalyzer(image=data1, target_subswaths=['iw1', 'iw2', 'iw3'], polarization='vv')
+    s1 = TopsSplitAnalyzer(target_subswaths=['iw1', 'iw2', 'iw3'], polarization='vv')
+    s1.load_data(zip_path=data1)
     
     ########################################################################
     # Check metadata list. All 6 items should be loaded regardless of user input
@@ -250,7 +249,8 @@ def test_TopsSplitAnalyzer_data1_all_vv():
     
 def test_TopsSplitAnalyzer_data1_all_vh():
 
-    s1 = TopsSplitAnalyzer(image=data1, target_subswaths=['iw1', 'iw2', 'iw3'], polarization='vh')
+    s1 = TopsSplitAnalyzer(target_subswaths=['iw1', 'iw2', 'iw3'], polarization='vh')
+    s1.load_data(zip_path=data1)
     
     ########################################################################
     # Check metadata list. All 6 items should be loaded regardless of user input
@@ -340,7 +340,8 @@ def test_TopsSplitAnalyzer_data1_all_vh():
 # Using data2 folder
 def test_TopsSplitAnalyzer_data2_all_vv():
     
-    s1 = TopsSplitAnalyzer(image=data2, target_subswaths=['iw1', 'iw2', 'iw3'], polarization='vv')
+    s1 = TopsSplitAnalyzer(target_subswaths=['iw1', 'iw2', 'iw3'], polarization='vv')
+    s1.load_data(zip_path=data2)
     
     ########################################################################
     # Check metadata list. All 6 items should be loaded regardless of user input
@@ -431,7 +432,8 @@ def test_TopsSplitAnalyzer_data2_all_vv():
 # Using data2 folder
 def test_TopsSplitAnalyzer_data2_all_vh():
     
-    s1 = TopsSplitAnalyzer(image=data2, target_subswaths=['iw1', 'iw2', 'iw3'], polarization='vh')
+    s1 = TopsSplitAnalyzer(target_subswaths=['iw1', 'iw2', 'iw3'], polarization='vh')
+    s1.load_data(zip_path=data2)
     
     ########################################################################
     # Check metadata list. All 6 items should be loaded regardless of user input
