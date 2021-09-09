@@ -4,8 +4,8 @@ import subprocess
 import sys
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STSA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'stsa')
-sys.path.append(REPO_ROOT)
-sys.path.append(STSA_DIR)
+# sys.path.append(REPO_ROOT)
+# sys.path.append(STSA_DIR)
 
 import pandas as pd
 import pytest
