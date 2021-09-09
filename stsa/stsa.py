@@ -109,9 +109,6 @@ class TopsSplitAnalyzer:
             
             if self._download_folder is None:
                 raise ValueError('User selected to download from API but no output folder is defined')
-            
-            if self._verbose is True:
-                print(f'Downloading XML data: {self._download_id}')
                 
             download = DownloadXML(
                 image=self._download_id,
@@ -280,7 +277,8 @@ class TopsSplitAnalyzer:
             df_all.columns = ['subswath', 'burst', 'geometry']
 
         self.df = df_all
-        assert self.df is not None, 'GeoDataFrame is empty'
+        if self.df is None:
+            raise Exception('Dataframe is empty. Please check data is loaded properly')
 
     def to_json(self, output_file):
         """

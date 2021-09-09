@@ -35,7 +35,12 @@ class DownloadXML:
         """
         link = self._get_product_uuid_link()
         xml_node = f"{link}/Nodes('{self._image}.SAFE')/Nodes('annotation')/Nodes"
+        if self._verbose is True:
+            print('Connecting to Copernicus API...')
         response = requests.get(xml_node, auth=self._auth)
+        if self._verbose is True and response.status_code == 200:
+            print('Connection successful')
+            
         xml_string = response.content
         root = xmltodict.parse(xml_string)
         
