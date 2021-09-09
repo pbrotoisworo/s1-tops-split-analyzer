@@ -5,6 +5,7 @@
 
 import argparse
 import json
+import glob
 import os
 import re
 import sys
@@ -17,36 +18,48 @@ import geopandas as gpd
 from shapely.geometry import Polygon
 import pandas as pd
 
+from search import DownloadXML
+
 
 class TopsSplitAnalyzer:
 
-    def __init__(self, image: str, target_subswaths: Union[None, str, list] = None, polarization: str = 'vv', verbose: bool = True):
+    def __init__(self, target_subswaths: Union[None, str, list] = None, polarization: str = 'vv',
+                 verbose: bool = True):
         """
         Class to interpret and visualize S1-TOPS-SPLIT data as seen in ESA SNAP software.
         
-        :param image: Path of ZIP file containing Sentinel-1 imagery
         :param target_subswath: String or list containing strings of subswaths to load. Defaults to all subswaths.
         :param polarization: Polarization of imagery. Valid options are 'vv' or 'vh' polarizations. Defaults to 'vv'
         :param verbose: Print statements. Defaults to True
         """
+        
+        if isinstance(target_subswaths, str):
+            if target_subswaths.lower() not in ['iw1', 'iw2', 'iw3']:
+                raise ValueError(f'Target subswath "{target_subswaths.lower()}" not a valid subswath')
+        
+        if isinstance(target_subswaths, list):
+            target_subswaths = [x.lower() for x in target_subswaths]
+        
+        if polarization is None:
+            polarization = 'vv'
+        if polarization.lower() not in ['vv', 'vh']:
+            raise ValueError(f'Input polarization "{polarization}" not reocgnized. Accepted is "vv" or "vh".')
+        
         # Load and check user inputs
         if target_subswaths is None:
             # Defaults to all bands if no target subswath specified
             target_subswaths = ['iw1', 'iw2', 'iw3']
+        
         if polarization is None:
             # Defaults to VV polarization
             polarization = 'vv'
-        if image is None:
-            raise ValueError('No input ZIP file was detected. Check inputs.')
-        if isinstance(target_subswaths, str):
-            if target_subswaths.lower() not in ['iw1', 'iw2', 'iw3']:
-                raise ValueError(f'Target subswath "{target_subswaths.lower()}" not a valid subswath')
-        if isinstance(target_subswaths, list):
-            target_subswaths = [x.lower() for x in target_subswaths]
-        if polarization.lower() not in ['vv', 'vh']:
-            raise ValueError(f'Input polarization "{polarization}" not reocgnized. Accepted is "vv" or "vh".')
             
-        self._image = image
+        self._image = None
+        self.archive = None
+        self._download_id = None
+        self._download_folder = None
+        self._api_user = None
+        self._api_download = None
         self._target_subswath = target_subswaths
         self.polarization = polarization.lower()
         self._verbose = verbose
@@ -56,35 +69,88 @@ class TopsSplitAnalyzer:
         self.metadata_file_list = []
         self.total_num_bursts = None
         self.df = None
+            
+    def load_data(self, zip_path: Union[str, None] = None, download_id: Union[str, None] = None,
+                  download_folder: Union[str, None] = None, api_user: Union[str, None] = None,
+                  api_password: Union[str, None] = None):
+        """
+        Load Sentinel-1 XML metadata
+
+        :param zip_path: Path of ZIP file containing full Sentinel-1 image, defaults to None
+        :param download_id: Scene ID of Sentinel-1 which will be downloaded, defaults to None
+        :param download_folder: Folder where downloaded XML files will be saved, defaults to None
+        :param api_user: Username for Copernicus Scihub, defaults to None
+        :param api_password: Password for Copernicus Scihub, defaults to None
+        """
         
-        # Initial functions
-        self.archive = ZipFile(self._image)
-        if self._verbose:
-            print(f'Loaded ZIP file: {os.path.basename(self._image)}')
+        if zip_path is None and download_id is None:
+            raise ValueError('No input data detected!')
+        
+        self._image = zip_path
+        self._download_id = download_id
+        self._download_folder = download_folder
+        self._api_user = api_user
+        self._api_password = api_password
+        self._is_downloaded_scene = False
+        
+        # Use ZIP file
+        if self._image is not None and self._download_id is None:
+            self.archive = ZipFile(self._image)
+            if self._verbose:
+                print(f'Loaded ZIP file: {os.path.basename(self._image)}')
+        
+        # Download data
+        else:
+            self._is_downloaded_scene = True
+            
+            if self._download_folder is None:
+                raise ValueError('User selected to download from API but no output folder is defined')
+            
+            if self._verbose is True:
+                print(f'Downloading XML data: {self._download_id}')
+                
+            download = DownloadXML(
+                image=self._download_id,
+                user=self._api_user,
+                password=self._api_password,
+                verbose=self._verbose
+            )
+            download.download_xml(output_directory=self._download_folder)
+            
+        # Load metadata
         self._load_metadata_paths()
+
         if self._verbose:
             print(f'Found {len(self.metadata_file_list)} XML paths')
+        return
         
     def _load_metadata_paths(self):
         """
         Get paths of metadata files based on RegEx string match
         """
-        # Get file list
-        archive_files = self.archive.namelist()
+        if self._is_downloaded_scene is False:
+            # Get file list
+            archive_files = self.archive.namelist()
 
-        # Get metadata files
-        regex_filter = r's1(a|b)-iw\d-slc-(vv|vh)-.*\.xml'
+            # Get metadata files
+            regex_filter = r's1(a|b)-iw\d-slc-(vv|vh)-.*\.xml'
 
-        # Reset metadata list before loading
-        self.metadata_file_list = []
-        for item in archive_files:
-            if 'calibration' in item:
-                continue
-            match = re.search(regex_filter, item)
-            if match:
-                self.metadata_file_list.append(item)
-        if not self.metadata_file_list:
-            raise Exception(f'No metadata files found in {os.path.basename(self._image)}')
+            # Reset metadata list before loading
+            self.metadata_file_list = []
+            for item in archive_files:
+                if 'calibration' in item:
+                    continue
+                match = re.search(regex_filter, item)
+                if match:
+                    self.metadata_file_list.append(item)
+            if not self.metadata_file_list:
+                raise Exception(f'No metadata files found in {os.path.basename(self._image)}')
+        else:
+            self.metadata_file_list = glob.glob(
+                os.path.join(self._download_folder, '*')
+            )
+            if len(self.metadata_file_list) == 0:
+                raise Exception(f'No metadata files found in {self._download_folder}')
 
     # Get metadata
     def _load_metadata(self, target_subswath=None, target_polarization=None):
@@ -100,17 +166,23 @@ class TopsSplitAnalyzer:
         if not target_polarization:
             target_polarization = self.polarization
 
-        assert isinstance(target_subswath, str) is True, f'Expected string for  target_subswath for _load_metadata. Got {target_subswath} which is type {type(target_subswath)}'
+        assert isinstance(target_subswath, str) is True, f'Expected string for target_subswath for _load_metadata. Got {target_subswath} which is type {type(target_subswath)}'
 
         target_file = None
         for item in self.metadata_file_list:
             if target_subswath in item and target_polarization in item:
                 target_file = item
         if not target_file:
-            raise Exception(f'Found no matching XML file with target subswath "{target_subswath}" and target polarization "{target_polarization}". Check TopsSplitAnalyzer.metadata_file_list for possible matches.')
-
-        # Open XML
-        metadata = self.archive.open(target_file)
+            raise Exception(f'Found no matching XML file with target subswath "{target_subswath}" and target polarization "{target_polarization}". \
+                            Possible matches: {self._metadata_file_list}')
+        
+        if self._is_downloaded_scene is False:
+            # Open XML from ZIP
+            metadata = self.archive.open(target_file)
+        else:
+            # Open XML from downloaded files
+            metadata = target_file
+        
         self._metadata = metadata
 
         self._check_metadata_loaded = True
@@ -282,19 +354,33 @@ if __name__ == '__main__':
     
     main_args = parser.add_argument_group('Script Parameters')
     main_args.add_argument('-v', help='Verbose mode', action='store_true')
-    main_args.add_argument('-zip', help='Input Sentinel-1 ZIP file')
+    main_args.add_argument('--zip', help='Input Sentinel-1 ZIP file')
+    main_args.add_argument('--api-scene', help='Target scene to download')
+    main_args.add_argument('--api-user', help='Username for Copernicus Scihub API')
+    main_args.add_argument('--api-password', help='Password for Copernicus Scihub API')
+    main_args.add_argument('--api-folder', help='Folder for downloaded XML files')
     
     xml_args = parser.add_argument_group('XML Parsing Parameters')
     xml_args.add_argument('--swaths', help='List of subswaths', nargs='*', choices=['iw1', 'iw2', 'iw3'])
-    xml_args.add_argument('-polar', help='Polarization', choices=['vv', 'vh'])
-    xml_args.add_argument('-shp', help='Output path of shapefile')
-    xml_args.add_argument('-csv', help='Output path of CSV file')
-    xml_args.add_argument('-json', help='Output path of JSON file')
+    xml_args.add_argument('--polar', help='Polarization', choices=['vv', 'vh'])
+    xml_args.add_argument('--shp', help='Output path of shapefile')
+    xml_args.add_argument('--csv', help='Output path of CSV file')
+    xml_args.add_argument('--json', help='Output path of JSON file')
     
     args = parser.parse_args()
     args = vars(args)
     
-    s1 = TopsSplitAnalyzer(image=args['zip'], target_subswaths=args['swaths'], polarization=args['polar'])
+    s1 = TopsSplitAnalyzer(
+        target_subswaths=args['swaths'],
+        polarization=args['polar']
+    )
+    s1.load_data(
+        zip_path=args['zip'],
+        download_id=args['api_scene'],
+        download_folder=args['api_folder'],
+        api_user=args['api_user'],
+        api_password=args['api_password']
+    )
     
     if args['shp']:
         print('Writing shapefile to', args['shp'])
