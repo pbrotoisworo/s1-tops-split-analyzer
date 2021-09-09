@@ -1,4 +1,6 @@
 descartes
 fiona
-folium
 geopandas
+folium
+xmltodict
+pytest
