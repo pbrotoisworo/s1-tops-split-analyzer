@@ -18,15 +18,14 @@ password = os.environ['PASSWORD']
 
 data1 = {
     'SCENE_ID': 'S1A_IW_SLC__1SDV_20210907T043106_20210907T043134_039571_04AD68_B6C1',
-    'UUID': '701b2515-5a29-44f3-9ce1-f185fcebf4de',
+    'UUID': '742a9324-3375-4aef-bc96-d4a2cfd6ac42',
     'XML_FILES': [
-        's1a-iw1-slc-vh-20210907t043106-20210907t043134-039571-04ad68-001.xml',
-        's1a-iw1-slc-vv-20210907t043106-20210907t043134-039571-04ad68-004.xml',
-        's1a-iw2-slc-vh-20210907t043107-20210907t043132-039571-04ad68-002.xml',
-        's1a-iw2-slc-vh-20210907t043107-20210907t043132-039571-04ad68-002.xml',
-        's1a-iw2-slc-vv-20210907t043107-20210907t043132-039571-04ad68-005.xml',
-        's1a-iw3-slc-vh-20210907t043108-20210907t043133-039571-04ad68-003.xml',
-        's1a-iw3-slc-vv-20210907t043108-20210907t043133-039571-04ad68-006.xml'
+        's1b-iw1-slc-vh-20210817t161548-20210817t161613-028288-036013-001.xml',
+        's1b-iw1-slc-vv-20210817t161548-20210817t161613-028288-036013-004.xml',
+        's1b-iw2-slc-vh-20210817t161547-20210817t161612-028288-036013-002.xml',
+        's1b-iw2-slc-vv-20210817t161547-20210817t161612-028288-036013-005.xml',
+        's1b-iw3-slc-vh-20210817t161547-20210817t161613-028288-036013-003.xml',
+        's1b-iw3-slc-vv-20210817t161547-20210817t161613-028288-036013-006.xml'
     ]
 }
 
@@ -40,8 +39,8 @@ def test_invalid_item():
         password=''
     )
 
-def test_api_connection():
-    "Test Copernicus API connection"
+def test_scene1():
+    "Download XML files using API"
     
     
     download = DownloadXML(
