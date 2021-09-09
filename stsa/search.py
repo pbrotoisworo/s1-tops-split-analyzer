@@ -22,6 +22,7 @@ class DownloadXML:
         self._password = password
         self._verbose = verbose
         self._auth = HTTPBasicAuth(self._user, self._password)
+        self._url = None
         
         if 'SLC' not in self._image:
             raise Exception('Scene ID does not belong to an SLC image')
@@ -37,10 +38,10 @@ class DownloadXML:
         :param output_directory: Output folder for downloaded files
         """
         link = self._get_product_uuid_link()
-        xml_node = f"{link}/Nodes('{self._image}.SAFE')/Nodes('annotation')/Nodes"
+        self._url = f"{link}/Nodes('{self._image}.SAFE')/Nodes('annotation')/Nodes"
         if self._verbose is True:
             print('Connecting to Copernicus API...')
-        response = requests.get(xml_node, auth=self._auth)
+        response = requests.get(self._url, auth=self._auth)
         if self._verbose is True and response.status_code == 200:
             print('Connection successful')
             
@@ -61,8 +62,11 @@ class DownloadXML:
                 response_metadata = requests.get(url, auth=self._auth)
                 
                 # Prepare output file
-                pattern = r's1[ab]-iw\d-slc-v[vh]-\d{8}t\d{6}-\d{8}t\d{6}-\d{6}-\d{6}-\d{3}.xml'
-                match = re.findall(pattern, url)[0]
+                pattern = r's1[ab]-iw\d-slc-v[vh]-\d{8}t\d{6}-\d{8}t\d{6}-\d{6}-.{6}-\d{3}.xml'
+                try:
+                    match = re.findall(pattern, url)[0]
+                except IndexError:
+                    raise IndexError(f'No RegEx match found! String that was searched is: {url}')
                 output_file = os.path.join(output_directory, match)
                 
                 if self._verbose is True:
