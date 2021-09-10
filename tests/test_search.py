@@ -13,6 +13,7 @@ import pytest
 
 from search import DownloadXML
 
+# TravisCI environment parameters
 username = os.environ['USERNAME']
 password = os.environ['PASSWORD']
 
@@ -31,7 +32,7 @@ data1 = {
 
 @pytest.mark.xfail
 def test_invalid_item():
-    "Test downloading a GRDH scene"
+    "Test downloading a GRDH scene. Expected to fail"
     image = r'S1A_IW_GRDH_1SDV_20210907T043107_20210907T043132_039571_04AD68_65B4'
     download = DownloadXML(
         image=image,
@@ -48,10 +49,26 @@ def test_get_uuid():
         password=password
     )
     uuid = download._get_product_uuid_link()
-    expected = r"https://scihub.copernicus.eu/dhus/odata/v1/Products('742a9324-3375-4aef-bc96-d4a2cfd6ac42')"
+    expected = r"https://scihub.copernicus.eu/dhus/odata/v1/Products('{}')".format(data1['UUID'])
     
     assert uuid == expected, f'Unexpected UUID. Expected {expected} got {uuid}'
     
+def test_check_product_online():
+    """Test if product is online or not. The test uses a dummy image as input.
+    The validity of the input image will never be checked in this test.
+    It is only testing the "_product_is_online" method
+    """
+    image='S1B_IW_SLC'
+    download = DownloadXML(
+        image=image,
+        user=username,
+        password=password
+    )
+    
+    test_image = r"https://scihub.copernicus.eu/dhus/odata/v1/Products('b64b60da-5836-4897-ad06-5e122e7f3e50')"
+    is_online = download._product_is_online(test_image)
+    
+    assert is_online is False, f'Product is {is_online}. But it should return True.'
 
 @pytest.mark.skip(reason="Copernicus takes data offline after 2 months. Currently not feasible to do this test in the long term.")
 def test_scene1():
