@@ -41,7 +41,7 @@ class DownloadXML:
         link = self._get_product_uuid_link()
         
         # If product is offline exit operation
-        is_online = self._product_is_online()
+        is_online = self._product_is_online(link)
         if is_online is False:
             print(f'Warning! Product {self._image} is offline! Please select another image')
             return
