@@ -7,6 +7,12 @@ coverage:
   precision: 2
   round: down
   range: 70...90
+  status:
+    project:
+      default:
+        # basic
+        target: 85
+        threshold: 5%
 
 ignore:
   - "stsa/search.py"  
