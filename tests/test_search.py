@@ -68,7 +68,7 @@ def test_check_product_online():
     test_image = r"https://scihub.copernicus.eu/dhus/odata/v1/Products('b64b60da-5836-4897-ad06-5e122e7f3e50')"
     is_online = download._product_is_online(test_image)
     
-    assert is_online is False, f'Product is {is_online}. But it should return True.'
+    assert is_online is False, f'Product is {is_online}. But it should return False.'
 
 @pytest.mark.skip(reason="Copernicus takes data offline after 2 months. Currently not feasible to do this test in the long term.")
 def test_scene1():
