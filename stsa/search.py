@@ -24,6 +24,7 @@ class DownloadXML:
         self._auth = HTTPBasicAuth(self._user, self._password)
         self._url = None
         self._is_online = None
+        self.xml_paths = []
         
         if 'SLC' not in self._image:
             raise Exception('Scene ID does not belong to an SLC image')
@@ -85,6 +86,9 @@ class DownloadXML:
                 # Write metadata file
                 with open(output_file, 'wb') as f:
                     f.write(response_metadata.content)
+                
+                # Save to metadata list
+                self.xml_paths.append(output_file)
     
     def _check_product_is_online(self, url: str) -> bool:
         """

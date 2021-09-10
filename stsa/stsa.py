@@ -117,6 +117,7 @@ class TopsSplitAnalyzer:
                 verbose=self._verbose
             )
             download.download_xml(output_directory=self._download_folder)
+            self.metadata_file_list = download.xml_paths
             if download.product_is_online is False:
                 return
             
@@ -151,11 +152,8 @@ class TopsSplitAnalyzer:
             if not self.metadata_file_list:
                 raise Exception(f'No metadata files found in {os.path.basename(self._image)}')
         else:
-            self.metadata_file_list = glob.glob(
-                os.path.join(self._download_folder, '*')
-            )
             if len(self.metadata_file_list) == 0:
-                raise Exception(f'No metadata files found in {self._download_folder}')
+                raise Exception(f'No XML files found in {self._download_folder}')
 
     # Get metadata
     def _load_metadata(self, target_subswath=None, target_polarization=None):
