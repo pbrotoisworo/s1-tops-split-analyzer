@@ -86,10 +86,10 @@ class DownloadXML:
         # Search DeletedProducts archive first. If it is not present there then
         # search in the Products archive
         try:
-            link = self._search_products_archive('DeletedProducts')
+            link = self._search_products_archive('Products')
         except KeyError:
             try:
-                link = self._search_products_archive('Products')
+                link = self._search_products_archive('DeletedProducts')
             except KeyError:
                 raise ValueError('XML not detected in DeletedProducts and Products archives. Check if input download scene ID is valid')
         return link

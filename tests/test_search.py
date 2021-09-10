@@ -38,12 +38,24 @@ def test_invalid_item():
         user='',
         password=''
     )
+    
+def test_get_uuid():
+    "Test that link is generated with correct UUID value"
+    image = data1['SCENE_ID']
+    download = DownloadXML(
+        image=image,
+        user=username,
+        password=password
+    )
+    uuid = download._get_product_uuid_link()
+    expected = r"https://scihub.copernicus.eu/dhus/odata/v1/Products('742a9324-3375-4aef-bc96-d4a2cfd6ac42')"
+    
+    assert uuid == expected, f'Unexpected UUID. Expected {expected} got {uuid}'
+    
 
 @pytest.mark.skip(reason="Copernicus takes data offline after 2 months. Currently not feasible to do this test in the long term.")
 def test_scene1():
     "Download XML files using API"
-    
-    
     download = DownloadXML(
         image=data1['SCENE_ID'],
         user=username,
