@@ -39,6 +39,7 @@ def test_invalid_item():
         password=''
     )
 
+@pytest.mark.skip(reason="Copernicus takes data offline after 2 months. Currently not feasible to do this test in the long term.")
 def test_scene1():
     "Download XML files using API"
     
