@@ -23,6 +23,7 @@ class DownloadXML:
         self._verbose = verbose
         self._auth = HTTPBasicAuth(self._user, self._password)
         self._url = None
+        self._is_online = None
         
         if 'SLC' not in self._image:
             raise Exception('Scene ID does not belong to an SLC image')
@@ -41,8 +42,8 @@ class DownloadXML:
         link = self._get_product_uuid_link()
         
         # If product is offline exit operation
-        is_online = self._product_is_online(link)
-        if is_online is False:
+        self.product_is_online = self._check_product_is_online(link)
+        if self.product_is_online is False:
             print(f'Warning! Product {self._image} is offline! Please select another image')
             return
         
@@ -85,7 +86,7 @@ class DownloadXML:
                 with open(output_file, 'wb') as f:
                     f.write(response_metadata.content)
     
-    def _product_is_online(self, url: str) -> bool:
+    def _check_product_is_online(self, url: str) -> bool:
         """
         Check if product is online
 

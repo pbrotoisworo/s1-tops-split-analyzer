@@ -117,6 +117,8 @@ class TopsSplitAnalyzer:
                 verbose=self._verbose
             )
             download.download_xml(output_directory=self._download_folder)
+            if download.product_is_online is False:
+                return
             
         # Load metadata
         self._load_metadata_paths()
@@ -177,7 +179,7 @@ class TopsSplitAnalyzer:
                 target_file = item
         if not target_file:
             raise Exception(f'Found no matching XML file with target subswath "{target_subswath}" and target polarization "{target_polarization}". \
-                            Possible matches: {self._metadata_file_list}')
+                            Possible matches: {self.metadata_file_list}')
         
         if self._is_downloaded_scene is False:
             # Open XML from ZIP
