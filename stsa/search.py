@@ -37,7 +37,16 @@ class DownloadXML:
 
         :param output_directory: Output folder for downloaded files
         """
+        # Get UUID from scene ID
         link = self._get_product_uuid_link()
+        
+        # If product is offline exit operation
+        is_online = self._product_is_online()
+        if is_online is False:
+            print(f'Warning! Product {self._image} is offline! Please select another image')
+            return
+        
+        # Construct URL that shows XML files
         self._url = f"{link}/Nodes('{self._image}.SAFE')/Nodes('annotation')/Nodes"
         if self._verbose is True:
             print('Connecting to Copernicus API...')
@@ -76,6 +85,19 @@ class DownloadXML:
                 with open(output_file, 'wb') as f:
                     f.write(response_metadata.content)
     
+    def _product_is_online(self, url: str) -> bool:
+        """
+        Check if product is online
+
+        :param url: URL containing product details
+        :return: Boolean True if online. False if offline
+        """
+        response = requests.get(url, auth=self._auth)
+        xml = response.content
+        root = xmltodict.parse(xml)
+        is_online = eval(root['entry']['m:properties']['d:Online'].title())
+        return is_online
+    
     def _get_product_uuid_link(self) -> str:
         """
         Prepare UUID link according to the scene ID
@@ -83,13 +105,13 @@ class DownloadXML:
         :rtype: str
         """
         
-        # Search DeletedProducts archive first. If it is not present there then
-        # search in the Products archive
+        # Search Products archive first. If it is not present there then
+        # search in the DeletedProducts archive
         try:
-            link = self._search_products_archive('DeletedProducts')
+            link = self._search_products_archive('Products')
         except KeyError:
             try:
-                link = self._search_products_archive('Products')
+                link = self._search_products_archive('DeletedProducts')
             except KeyError:
                 raise ValueError('XML not detected in DeletedProducts and Products archives. Check if input download scene ID is valid')
         return link
