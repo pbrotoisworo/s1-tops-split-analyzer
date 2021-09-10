@@ -12,7 +12,7 @@ coverage:
       default:
         # basic
         target: 85
-        threshold: 5%
+        threshold: 1%
 
 ignore:
   - "stsa/search.py"  

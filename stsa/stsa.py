@@ -133,10 +133,11 @@ class TopsSplitAnalyzer:
         Get paths of metadata files based on RegEx string match
         """
         
-        # Reset metadata list before loading
-        self.metadata_file_list = []
-        
         if self._is_downloaded_scene is False:
+            
+            # Reset metadata list before loading
+            self.metadata_file_list = []
+            
             # Get file list
             archive_files = self.archive.namelist()
 
