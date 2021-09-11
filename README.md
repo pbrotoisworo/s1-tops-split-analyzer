@@ -18,7 +18,7 @@ Comments and feedback are welcome.
 
 This has been tested to work in Python versions 3.6 to 3.9
 
-**If you are using Windows you need to manually install the [GDAL](https://www.lfd.uci.edu/~gohlke/pythonlibs/#gdal) and [Fiona](https://www.lfd.uci.edu/~gohlke/pythonlibs/#fiona) wheels OR install using Anaconda**:
+**If you are using Windows you need to manually install the [GDAL](https://www.lfd.uci.edu/~gohlke/pythonlibs/#gdal) and [Fiona](https://www.lfd.uci.edu/~gohlke/pythonlibs/#fiona) wheels OR install Fiona using Anaconda**:
 
 `conda install -c conda-forge fiona`
 
@@ -60,7 +60,7 @@ Below is a sample of using `TopsSplitAnalyzer` to create a shapefile and visuali
 # Create object
 import stsa
 
-s1 = stsa.TopsSplitAnalyzer(target_subswaths=['iw1, iw2, iw3'], polarization='vh')
+s1 = stsa.TopsSplitAnalyzer(target_subswaths=['iw1', 'iw2', 'iw3'], polarization='vh')
 s1.load_Data(zip_path='S1_image.zip')
 
 # Write to shapefile
