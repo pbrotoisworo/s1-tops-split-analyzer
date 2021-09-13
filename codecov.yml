@@ -13,3 +13,4 @@ coverage:
       default:
         # basic
         target: 1
+        threshold: 0
