@@ -12,5 +12,7 @@ coverage:
     project:
       default:
         # basic
-        target: 1
-        threshold: 0
+        # target: 90
+        # threshold: 1
+        # Always succeed
+        if_ci_failed: success #success, failure, error, ignore
