@@ -15,4 +15,5 @@ coverage:
         # target: 90
         # threshold: 1
         # Always succeed
-        if_ci_failed: success #success, failure, error, ignore
+        informational: true
+        if_ci_failed: success #success,error
