@@ -1,3 +1,4 @@
+# Codecov should always pass. Codecov is used for informational purposes only
 codecov:
   require_ci_to_pass: false
   notify:

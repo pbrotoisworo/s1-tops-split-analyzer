@@ -116,7 +116,10 @@ class TopsSplitAnalyzer:
                 password=self._api_password,
                 verbose=self._verbose
             )
-            download.download_xml(output_directory=self._download_folder)
+            download.download_xml(
+                output_directory=self._download_folder,
+                polarization=self.polarization
+            )
             self.metadata_file_list = download.xml_paths
             if download.product_is_online is False:
                 return

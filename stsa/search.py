@@ -74,8 +74,8 @@ class DownloadXML:
         for item in range(len(root['feed']['entry'])):
             
             url = root['feed']['entry'][item]['id']
-            
-            if url.endswith(".xml')") and f'-{polarization}-' in url:
+
+            if url.endswith(".xml')") and f'-{polarization}-' in os.path.basename(url):
                 
                 # If it finds an XML file then add /$value to link to the XML file contents
                 url += r'/$value'
