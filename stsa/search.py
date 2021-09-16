@@ -4,6 +4,10 @@ import requests
 from requests.auth import HTTPBasicAuth
 import xmltodict
 
+# Custom errors for download XML
+class DownloadError(Exception):
+    pass
+
 
 class DownloadXML:
     
@@ -39,6 +43,12 @@ class DownloadXML:
 
         :param output_directory: Output folder for downloaded files
         """
+        
+        # Check polarization argument
+        if polarization.lower() not in ['vv', 'vh']:
+            raise DownloadError(f'Polarization "{polarization}" is not accepted. Only "vv" or "vh" is valid')
+        polarization = polarization.lower()
+        
         # Get UUID from scene ID
         link = self._get_product_uuid_link()
         
@@ -50,11 +60,12 @@ class DownloadXML:
         
         # Construct URL that shows XML files
         self._url = f"{link}/Nodes('{self._image}.SAFE')/Nodes('annotation')/Nodes"
+        
+        # Connect and check response code
         if self._verbose is True:
-            print('Connecting to Copernicus API...')
+            print('Connecting to Copernicus API...')        
         response = requests.get(self._url, auth=self._auth)
-        if self._verbose is True and response.status_code == 200:
-            print('Connection successful')
+        self._check_requests_status_code(response.status_code)
             
         xml_string = response.content
         root = xmltodict.parse(xml_string)
@@ -89,6 +100,23 @@ class DownloadXML:
                 
                 # Save to metadata list
                 self.xml_paths.append(output_file)
+                
+    def _check_requests_status_code(self, code: int):
+        """
+        Check return code of the API.
+
+        :param code: Return code received from server in integer format
+        """
+        
+        if self._verbose is True and code == 200:
+            print('Connection successful')
+        elif code > 200 and code < 300:
+            print(f'Connected to server but something went wrong. Status code: {code}')
+        elif code == 404:
+            raise DownloadError(f'Could not connect to server. Status code: {code}')
+        else:
+            print(f'API status code: {code}')
+        return
     
     def _check_product_is_online(self, url: str) -> bool:
         """
