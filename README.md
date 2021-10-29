@@ -61,7 +61,7 @@ Below is a sample of using `TopsSplitAnalyzer` to create a shapefile and visuali
 import stsa
 
 s1 = stsa.TopsSplitAnalyzer(target_subswaths=['iw1', 'iw2', 'iw3'], polarization='vh')
-s1.load_Data(zip_path='S1_image.zip')
+s1.load_data(zip_path='S1_image.zip')
 
 # Write to shapefile
 s1.to_shapefile('data.shp')
