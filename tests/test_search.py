@@ -14,8 +14,13 @@ import pytest
 from search import DownloadXML
 
 # TravisCI environment parameters
-username = os.environ['USERNAME']
-password = os.environ['PASSWORD']
+found_ci_params = True
+try:
+    username = os.environ['USERNAME']
+    password = os.environ['PASSWORD']
+except KeyError:
+    print('TravisCI environment parameters not found! Skipping search tests.')
+    found_ci_params = False
 
 data1 = {
     'SCENE_ID': 'S1B_IW_SLC__1SDV_20210817T161547_20210817T161613_028288_036013_900E',
@@ -30,6 +35,8 @@ data1 = {
     ]
 }
 
+
+@pytest.mark.skipif(found_ci_params is False, reason="Skipping because TravisCI environment parameters not found.")
 @pytest.mark.xfail
 def test_invalid_item():
     "Test downloading a GRDH scene. Expected to fail"
@@ -39,7 +46,9 @@ def test_invalid_item():
         user='',
         password=''
     )
-    
+
+
+@pytest.mark.skipif(found_ci_params is False, reason="Skipping because TravisCI environment parameters not found.")
 def test_get_uuid():
     "Test that link is generated with correct UUID value"
     image = data1['SCENE_ID']
@@ -52,7 +61,9 @@ def test_get_uuid():
     expected = r"https://scihub.copernicus.eu/dhus/odata/v1/Products('{}')".format(data1['UUID'])
     
     assert uuid == expected, f'Unexpected UUID. Expected {expected} got {uuid}'
-    
+
+
+@pytest.mark.skipif(found_ci_params is False, reason="Skipping because TravisCI environment parameters not found.")
 def test_check_product_online():
     """Test if product is online or not. The test uses a dummy image as input.
     The validity of the input image will never be checked in this test.
@@ -71,6 +82,8 @@ def test_check_product_online():
     
     assert isinstance(is_online, bool), f'Product is {is_online} of type {type(is_online)}. But it should be a boolean.'
 
+
+@pytest.mark.skipif(found_ci_params is False, reason="Skipping because TravisCI environment parameters not found.")
 @pytest.mark.skip(reason="Copernicus takes data offline after 2 months. Currently not feasible to do this test in the long term.")
 def test_scene1():
     "Download XML files using API"
