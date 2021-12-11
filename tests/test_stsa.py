@@ -53,7 +53,7 @@ def test_TopsSplitAnalyzer_string_caps_input():
     
     expected = 'vv'
     actual = s1.polarization
-    assert actual == expected, f'Polarization does not match. Actual is {actual}. Expected is {Expected}'
+    assert actual == expected, f'Polarization does not match. Actual is {actual}. Expected is {expected}'
     
     expected = ['iw1', 'iw2', 'iw3']
     actual = s1._target_subswath
@@ -81,7 +81,7 @@ def test_TopsSplitAnalyzer_xfail_subswath2():
 @pytest.mark.xfail
 def test_TopsSplitAnalyzer_xfail_invalid_polarization():
     "Should fail due to invalid polarization"
-    s1 = TopsSplitAnalyzer(image=data2, polarization='HV')
+    s1 = TopsSplitAnalyzer(polarization='HV')
     s1.load_zip(zip_path=data2)
 
 @pytest.mark.xfail
