@@ -334,24 +334,33 @@ class TopsSplitAnalyzer:
         """
 
         if isinstance(self._target_subswath, list):
-            df_all = gpd.GeoDataFrame(columns=['subswath', 'burst', 'geometry'])
+            # Create empty dataframe for subswaths to be added into
+            df_all = gpd.GeoDataFrame(columns=['subswath', 'burst', 'geometry'], crs='EPSG:4326')
             for subswath in self._target_subswath:
                 self._load_metadata(subswath, self.polarization)
                 coord_list = self._parse_location_grid()
                 subswath_geom = self._parse_subswath_geometry(coord_list)
                 df = gpd.GeoDataFrame(
-                    [[subswath.upper()] * len(subswath_geom), subswath_geom.keys(), subswath_geom.values()],
-                    crs='EPSG:4326').T
-                df.columns = ['subswath', 'burst', 'geometry']
+                    {'subswath': [subswath.upper()] * len(subswath_geom),
+                     'burst': [x for x in subswath_geom.keys()],
+                     'geometry': [x for x in subswath_geom.values()]
+                     },
+                    crs='EPSG:4326'
+                )
+                # Concat to main dataframe
                 df_all = gpd.GeoDataFrame(pd.concat([df_all, df]), crs='EPSG:4326')
         else:
             # Write one subswath only
             self._load_metadata()
             coord_list = self._parse_location_grid()
             subswath_geom = self._parse_subswath_geometry(coord_list)
-
-            df_all = gpd.GeoDataFrame([[self._target_subswath.upper()] * len(subswath_geom), subswath_geom.keys(), subswath_geom.values()], crs='EPSG:4326').T
-            df_all.columns = ['subswath', 'burst', 'geometry']
+            df_all = gpd.GeoDataFrame(
+                {'subswath': [self._target_subswath.upper()] * len(subswath_geom),
+                 'burst': [x for x in subswath_geom.keys()],
+                 'geometry': [x for x in subswath_geom.values()]
+                 },
+                crs='EPSG:4326'
+            )
 
         self.df = df_all
         if self.df is None:
