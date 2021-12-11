@@ -4,6 +4,7 @@ import requests
 from requests.auth import HTTPBasicAuth
 import xmltodict
 
+
 # Custom errors for download XML
 class DownloadError(Exception):
     pass
