@@ -26,7 +26,7 @@ data2 = os.path.join(TEST_DIR, 'data2', 'S1A_IW_SLC__1SDV_20200929T214701_202009
 def test_TopsSplitAnalyzer_string_subswath():
     
     s1 = TopsSplitAnalyzer(target_subswaths='iw2')
-    s1.load_data(zip_path=data2)
+    s1.load_zip(zip_path=data2)
     out_file = 'test_json.json'
     s1.to_json(out_file)
     
@@ -36,7 +36,7 @@ def test_TopsSplitAnalyzer_string_subswath():
 def test_TopsSplitAnalyzer_use_defaults():
     
     s1 = TopsSplitAnalyzer()
-    s1.load_data(zip_path=data2)
+    s1.load_zip(zip_path=data2)
     expected = 'vv'
     actual = s1.polarization
     assert expected == actual, f'Polarization does not match. Actual is {actual}. Expected is {expected}'
@@ -49,7 +49,7 @@ def test_TopsSplitAnalyzer_use_defaults():
 def test_TopsSplitAnalyzer_string_caps_input():
     "Check input if in all caps"
     s1 = TopsSplitAnalyzer(target_subswaths=['IW1', 'IW2', 'IW3'], polarization='VV')
-    s1.load_data(zip_path=data2)
+    s1.load_zip(zip_path=data2)
     
     expected = 'vv'
     actual = s1.polarization
@@ -69,20 +69,28 @@ def test_TopsSplitAnalyzer_string_caps_input():
 @pytest.mark.xfail
 def test_TopsSplitAnalyzer_xfail_subswath1():
     "Should fail due to improper input for subswaths"
-    s1 = TopsSplitAnalyzer(target_subswaths=['iw1' 'iw2' 'iw3'], polarization='vv')
-    s1.load_data(zip_path=data2)
+    s1 = TopsSplitAnalyzer(target_subswaths=['iw1 iw2 iw3'], polarization='vv')
+    s1.load_zip(zip_path=data2)
     
 @pytest.mark.xfail
 def test_TopsSplitAnalyzer_xfail_subswath2():
     "Should fail due to iw4 not being a valid subswath"
     s1 = TopsSplitAnalyzer(target_subswaths=['iw1', 'iw4'], polarization='vv')
-    s1.load_data(zip_path=data2)
+    s1.load_zip(zip_path=data2)
     
 @pytest.mark.xfail
 def test_TopsSplitAnalyzer_xfail_invalid_polarization():
     "Should fail due to invalid polarization"
     s1 = TopsSplitAnalyzer(image=data2, polarization='HV')
-    s1.load_data(zip_path=data2)
+    s1.load_zip(zip_path=data2)
+
+@pytest.mark.xfail
+def test_non_single_input():
+    "Should fail due to multiple inputs from API and ZIP. Should only be one input."
+
+    cmd = f'python stsa.py --zip {data1} --api-user 123 --api-password 123'.split()
+    subprocess.call(cmd, cwd=STSA_DIR)
+    return
   
 def test_TopsSplitAnalyzer_cli_json():
     "CLI with JSON output"
@@ -160,7 +168,7 @@ def test_TopsSplitAnalyzer_cli_subswaths():
 def test_TopsSplitAnalyzer_data1_all_vv():
     
     s1 = TopsSplitAnalyzer(target_subswaths=['iw1', 'iw2', 'iw3'], polarization='vv')
-    s1.load_data(zip_path=data1)
+    s1.load_zip(zip_path=data1)
     
     ########################################################################
     # Check metadata list. All 6 items should be loaded regardless of user input
@@ -250,7 +258,7 @@ def test_TopsSplitAnalyzer_data1_all_vv():
 def test_TopsSplitAnalyzer_data1_all_vh():
 
     s1 = TopsSplitAnalyzer(target_subswaths=['iw1', 'iw2', 'iw3'], polarization='vh')
-    s1.load_data(zip_path=data1)
+    s1.load_zip(zip_path=data1)
     
     ########################################################################
     # Check metadata list. All 6 items should be loaded regardless of user input
@@ -341,7 +349,7 @@ def test_TopsSplitAnalyzer_data1_all_vh():
 def test_TopsSplitAnalyzer_data2_all_vv():
     
     s1 = TopsSplitAnalyzer(target_subswaths=['iw1', 'iw2', 'iw3'], polarization='vv')
-    s1.load_data(zip_path=data2)
+    s1.load_zip(zip_path=data2)
     
     ########################################################################
     # Check metadata list. All 6 items should be loaded regardless of user input
@@ -433,7 +441,7 @@ def test_TopsSplitAnalyzer_data2_all_vv():
 def test_TopsSplitAnalyzer_data2_all_vh():
     
     s1 = TopsSplitAnalyzer(target_subswaths=['iw1', 'iw2', 'iw3'], polarization='vh')
-    s1.load_data(zip_path=data2)
+    s1.load_zip(zip_path=data2)
     
     ########################################################################
     # Check metadata list. All 6 items should be loaded regardless of user input

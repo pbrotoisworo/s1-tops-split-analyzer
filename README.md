@@ -42,7 +42,7 @@ CLI access is available if you directly run `stsa.py`. The available flags are:
 | --csv     | Path of output CSV file     |
 | --json    | Path of output JSON file    |
 | --api-user | Copernicus username |
-| --api-password | Copernicus password |
+| --api-password | Copernicus password (Leave empty for secure input) |
 | --api-scene | Sentinel-1 scene ID to download |
 | --api-folder | Folder for downloaded XML files |
 
@@ -54,14 +54,33 @@ python stsa.py --zip S1_image.zip --swaths iw2 iw3 --polar vv --shp out_shp.shp 
 
 ## Python Import
 
-Below is a sample of using `TopsSplitAnalyzer` to create a shapefile and visualize on a webmap. To visualize on a webmap you need to be using Jupyter Notebook.
+Below are code samples of using `TopsSplitAnalyzer`. When loading Sentinel-1 data please choose either API or ZIP 
+method only. 
 
 ```python
-# Create object
+############################################
+# Load data using `load_api` or `load_zip`
+############################################
+
 import stsa
 
 s1 = stsa.TopsSplitAnalyzer(target_subswaths=['iw1', 'iw2', 'iw3'], polarization='vh')
-s1.load_data(zip_path='S1_image.zip')
+
+# METHOD 1: Load using local ZIP file
+s1.load_zip(zip_path='S1_image.zip')
+
+# METHOD 2: Load using Copernicus Scihub API
+s1.load_api(
+    'myusername',
+    'S1A_IW_SLC__1SDV_20210627T043102_20210627T043130_038521_048BB9_DA44',
+    'mypassword'
+)
+```
+```python
+##################################################################
+# Export the data in your preferred format.
+# To visualize on a webmap you need to be using Jupyter Notebook.
+##################################################################
 
 # Write to shapefile
 s1.to_shapefile('data.shp')

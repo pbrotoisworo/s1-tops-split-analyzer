@@ -11,6 +11,7 @@ import re
 import sys
 from typing import Union
 import xml.etree.ElementTree as ET
+import warnings
 from zipfile import ZipFile
 
 import folium
@@ -64,6 +65,8 @@ class TopsSplitAnalyzer:
         self._download_folder = None
         self._api_user = None
         self._api_download = None
+        self._is_downloaded_scene = None
+        self._api_password = None
         self._target_subswath = target_subswaths
         self.polarization = polarization.lower()
         self._verbose = verbose
@@ -73,6 +76,70 @@ class TopsSplitAnalyzer:
         self.metadata_file_list = []
         self.total_num_bursts = None
         self.df = None
+
+    def load_api(self, username: str, scene_id: str, password: Union[str, None] = None,
+                 download_folder: Union[str, None] = None) -> None:
+        """
+        Load Sentinel-1 scene through the Copernicus API. Only the relevant XML data will be downloaded.
+        Create an account here: https://scihub.copernicus.eu/dhus/#/self-registration
+
+        :param username: Username for Copernicus Scihub
+        :param password: Password for Copernicus Scihub. For more secure input do not input a password. User will be
+            prompted to enter password via hidden input.
+        :param download_folder: Download folder for the XML files
+        """
+
+        self._api_user = username
+        self._api_password = password
+        self._download_id = scene_id
+        self._download_folder = download_folder
+        self._is_downloaded_scene = True
+
+        if self._download_folder is None:
+            raise ValueError('User selected to download from API but no output folder is defined')
+
+        download = DownloadXML(
+            image=self._download_id,
+            user=self._api_user,
+            password=self._api_password,
+            verbose=self._verbose
+        )
+        download.download_xml(
+            output_directory=self._download_folder,
+            polarization=self.polarization
+        )
+        self.metadata_file_list = download.xml_paths
+        if download.product_is_online is False:
+            return
+
+        # Load metadata
+        self._load_metadata_paths()
+
+        if self._verbose:
+            print(f'Found {len(self.metadata_file_list)} XML paths')
+
+        return
+
+    def load_zip(self, zip_path: Union[str, None] = None):
+        """
+        Load ZIP file containing Sentinel-1 SLC data. XML data containing the burst regions will be loaded.
+
+        :param zip_path:
+        :return:
+        """
+        self._is_downloaded_scene = False
+        self._image = zip_path
+        self.archive = ZipFile(self._image)
+        if self._verbose:
+            print(f'Loaded ZIP file: {os.path.basename(self._image)}')
+
+        # Load metadata
+        self._load_metadata_paths()
+
+        if self._verbose:
+            print(f'Found {len(self.metadata_file_list)} XML paths')
+
+        return
             
     def load_data(self, zip_path: Union[str, None] = None, download_id: Union[str, None] = None,
                   download_folder: Union[str, None] = None, api_user: Union[str, None] = None,
@@ -86,6 +153,10 @@ class TopsSplitAnalyzer:
         :param api_user: Username for Copernicus Scihub, defaults to None
         :param api_password: Password for Copernicus Scihub, defaults to None
         """
+
+        # Deprecation message
+        warnings.warn('"load_data" is deprecated and will be removed soon. Please use "load_api" or "load_zip" '
+                      'in the future.')
         
         if zip_path is None and download_id is None:
             raise ValueError('No input data detected!')
@@ -354,7 +425,8 @@ class TopsSplitAnalyzer:
         Close connection to ZIP file
         """
         self.archive.close()
-        
+
+
 if __name__ == '__main__':
     
     # Define CLI flags and parse inputs
@@ -363,7 +435,7 @@ if __name__ == '__main__':
     main_args = parser.add_argument_group('Script Parameters')
     main_args.add_argument('-v', help='Verbose mode', action='store_true')
     main_args.add_argument('--zip', help='Input Sentinel-1 ZIP file')
-    main_args.add_argument('--api-scene', help='Target scene to download')
+    main_args.add_argument('--api-scene', help='Target scene ID to download')
     main_args.add_argument('--api-user', help='Username for Copernicus Scihub API')
     main_args.add_argument('--api-password', help='Password for Copernicus Scihub API')
     main_args.add_argument('--api-folder', help='Folder for downloaded XML files')
@@ -377,19 +449,26 @@ if __name__ == '__main__':
     
     args = parser.parse_args()
     args = vars(args)
-    
+
     s1 = TopsSplitAnalyzer(
         target_subswaths=args['swaths'],
         polarization=args['polar']
     )
-    s1.load_data(
-        zip_path=args['zip'],
-        download_id=args['api_scene'],
-        download_folder=args['api_folder'],
-        api_user=args['api_user'],
-        api_password=args['api_password']
-    )
-    
+
+    if args['zip'] and (args['api_user'] and args['api_password']):
+        print('Error! Input detected for ZIP and API methods. Please use one method only.')
+        sys.exit()
+
+    if args['zip'] is not None:
+        s1.load_zip(zip_path=args['zip'])
+    else:
+        s1.load_api(
+            username=args['api_user'],
+            password=args['api_password'],
+            scene_id=args['api_scene'],
+            download_folder=args['api_folder']
+        )
+
     if args['shp']:
         print('Writing shapefile to', args['shp'])
         s1.to_shapefile(args['shp'])
