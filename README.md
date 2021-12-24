@@ -22,9 +22,9 @@ This has been tested to work in Python versions 3.6 to 3.9
 
 `conda install -c conda-forge fiona`
 
-Linux or MacOS users can disregard the previous instruction. Install stsa into your environment by opening the terminal in the repo root folder and typing this command:
+Linux or MacOS users can disregard the previous instruction. Install stsa into your environment by typing this command:
 
-`pip install .`
+`pip install git+https://github.com/pbrotoisworo/s1-tops-split-analyzer.git`
 
 # Usage
 STSA can be used in the command line and as a Python import.
