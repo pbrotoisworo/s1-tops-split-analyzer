@@ -15,7 +15,7 @@ setup(
         'folium',
         'xmltodict',
         'streamlit',
-        'streamlit_folium'
+        'streamlit-folium'
         'pytest'
     ],
     classifiers=[
