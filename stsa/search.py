@@ -3,6 +3,7 @@ import re
 import requests
 from requests.auth import HTTPBasicAuth
 import xmltodict
+import io
 
 
 # Custom errors for download XML
@@ -28,7 +29,7 @@ class DownloadXML:
         self._verbose = verbose
         self._auth = HTTPBasicAuth(self._user, self._password)
         self._url = None
-        self._is_online = None
+        self.product_is_online = None
         self.xml_paths = []
         
         if 'SLC' not in self._image:
