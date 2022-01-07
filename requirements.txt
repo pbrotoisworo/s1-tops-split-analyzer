@@ -3,4 +3,6 @@ fiona
 geopandas
 folium
 xmltodict
+streamlit
+streamlit-folium
 pytest
