@@ -39,9 +39,9 @@ with st.form(key='api'):
 if load_button:
 
     loading_text = st.empty()
-    loading_text.write('Loading data...')
+    loading_text.write('Connecting to API...')
 
-    s1 = TopsSplitAnalyzer()
+    s1 = TopsSplitAnalyzer(streamlit_mode=True)
     s1.load_api(
         username=username,
         password=password,
@@ -50,5 +50,6 @@ if load_button:
     )
     if s1.api_product_is_online is False:
         st.error(f'Error: Scene is offline')
+        st.stop()
     streamlit_folium.folium_static(s1.visualize_webmap(), width=1200, height=800)
-    loading_text = st.empty()
+    loading_text.write('')

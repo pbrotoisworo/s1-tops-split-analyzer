@@ -370,6 +370,10 @@ class TopsSplitAnalyzer:
         if self.df is None:
             raise Exception('Dataframe is empty. Please check data is loaded properly')
 
+        if self._streamlit_mode is True:
+            for item in self.metadata_file_list:
+                os.remove(item)
+
     def to_json(self, output_file):
         """
         Returns S1-TOPS-SPLIT data in JSON format
