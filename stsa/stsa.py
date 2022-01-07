@@ -29,13 +29,14 @@ except ImportError:
 class TopsSplitAnalyzer:
 
     def __init__(self, target_subswaths: Union[None, str, list] = None, polarization: str = 'vv',
-                 verbose: bool = True):
+                 verbose: bool = True, streamlit_mode: bool = False):
         """
         Class to interpret and visualize S1-TOPS-SPLIT data as seen in ESA SNAP software.
         
         :param target_subswath: String or list containing strings of subswaths to load. Defaults to all subswaths.
         :param polarization: Polarization of imagery. Valid options are 'vv' or 'vh' polarizations. Defaults to 'vv'
         :param verbose: Print statements. Defaults to True
+        :param streamlit_mode: Run stsa for streamlit
         """
         
         if isinstance(target_subswaths, str):
@@ -65,11 +66,13 @@ class TopsSplitAnalyzer:
         self._download_folder = None
         self._api_user = None
         self._api_download = None
+        self.api_product_is_online = None
         self._is_downloaded_scene = None
         self._api_password = None
         self._target_subswath = target_subswaths
         self.polarization = polarization.lower()
         self._verbose = verbose
+        self._streamlit_mode = streamlit_mode
 
         # Declare variables
         self._metadata = None
@@ -108,8 +111,9 @@ class TopsSplitAnalyzer:
             output_directory=self._download_folder,
             polarization=self.polarization
         )
+        self.api_product_is_online = download.product_is_online
         self.metadata_file_list = download.xml_paths
-        if download.product_is_online is False:
+        if self.api_product_is_online is False:
             return
 
         # Load metadata
