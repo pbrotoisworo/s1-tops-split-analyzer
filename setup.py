@@ -14,6 +14,8 @@ setup(
         'geopandas',
         'folium',
         'xmltodict',
+        'streamlit',
+        'streamlit_folium'
         'pytest'
     ],
     classifiers=[
