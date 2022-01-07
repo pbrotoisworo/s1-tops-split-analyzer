@@ -1,5 +1,10 @@
 import streamlit as st
-import streamlit_folium
+try:
+    import streamlit_folium
+except ImportError:
+    import subprocess
+    subprocess.run(['pip', 'install', 'streamlit-folium'])
+    import streamlit_folium
 
 from stsa.stsa import TopsSplitAnalyzer
 
