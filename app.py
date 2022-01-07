@@ -1,5 +1,5 @@
 import streamlit as st
-from streamlit_folium import folium_static
+import streamlit_folium
 
 from stsa.stsa import TopsSplitAnalyzer
 
@@ -50,5 +50,5 @@ if load_button:
     )
     if s1.api_product_is_online is False:
         st.error(f'Error: Scene is offline')
-    folium_static(s1.visualize_webmap(), width=1200, height=800)
+    streamlit_folium.folium_static(s1.visualize_webmap(), width=1200, height=800)
     loading_text = st.empty()
