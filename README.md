@@ -14,6 +14,10 @@ Using S-1 TOPS SPLIT Analyzer you are able to:
 
 Comments and feedback are welcome.
 
+# Live Web App
+
+For easier usage. STSA has a web app which is hosted by Streamlit. [Access it here!](https://share.streamlit.io/pbrotoisworo/s1-tops-split-analyzer/main/app.py) You can view data and download it in GeoJSON format.
+
 # Installation
 
 This has been tested to work in Python versions 3.6 to 3.9
