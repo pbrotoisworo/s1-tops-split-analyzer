@@ -36,7 +36,12 @@ class DownloadXML:
         self.xml_paths = []
         
         if 'SLC' not in self._image:
-            raise Exception('Scene ID does not belong to an SLC image')
+            msg = 'Scene ID does not belong to an SLC image'
+            if self._streamlit_mode:
+                st.error(msg)
+                st.stop()
+            else:
+                raise DownloadError(msg)
         
         # Set OData API environment parameters
         os.environ['DHUS_USER'] = user
@@ -64,7 +69,7 @@ class DownloadXML:
             if self._streamlit_mode:
                 st.warning(msg)
             else:
-                print(f'Warning! Product {self._image} is offline! Please select another image')
+                print(msg)
             return
         
         # Construct URL that shows XML files
