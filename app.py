@@ -37,7 +37,7 @@ with st.form(key='api'):
 
 if load_button:
 
-    s1 = TopsSplitAnalyzer(streamlit_mode=True)
+    s1 = TopsSplitAnalyzer(streamlit_mode=True, verbose=False)
     with st.spinner('Connecting to API...'):
         s1.load_api(
             username=username,

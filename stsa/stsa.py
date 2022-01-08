@@ -413,8 +413,10 @@ class TopsSplitAnalyzer:
         if self.df is None:
             self._create_subswath_geometry()
 
-        location_x = self.df.centroid.map(lambda p: p.x).iloc[0]
-        location_y = self.df.centroid.map(lambda p: p.y).iloc[0]
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            location_x = self.df.centroid.map(lambda p: p.x).iloc[0]
+            location_y = self.df.centroid.map(lambda p: p.y).iloc[0]
         m = folium.Map(location=[location_y, location_x], zoom_start=8)
 
         boundary = folium.FeatureGroup(name='Sentinel-1 Data').add_to(m)

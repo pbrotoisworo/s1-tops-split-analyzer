@@ -116,9 +116,11 @@ class DownloadXML:
 
         :param code: Return code received from server in integer format
         """
-        
-        if self._verbose is True and code == 200:
-            print('Connection successful')
+
+        if code == 200:
+            if self._verbose:
+                print('Connection successful')
+            return
         elif 200 < code < 300:
             msg = f'Connected to server but something went wrong. Status code: {code}'
             if self._streamlit_mode:
@@ -142,7 +144,7 @@ class DownloadXML:
         else:
             msg = f'API status code: {code}'
             if self._streamlit_mode:
-                st.warn(msg)
+                st.warning(msg)
             else:
                 print(msg)
         return
