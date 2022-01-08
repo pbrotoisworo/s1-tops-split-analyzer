@@ -5,7 +5,6 @@
 
 import argparse
 import json
-import glob
 import os
 import re
 import sys
@@ -49,7 +48,7 @@ class TopsSplitAnalyzer:
         if polarization is None:
             polarization = 'vv'
         if polarization.lower() not in ['vv', 'vh']:
-            raise ValueError(f'Input polarization "{polarization}" not reocgnized. Accepted is "vv" or "vh".')
+            raise ValueError(f'Input polarization "{polarization}" not recognized. Accepted is "vv" or "vh".')
         
         # Load and check user inputs
         if target_subswaths is None:
@@ -105,7 +104,8 @@ class TopsSplitAnalyzer:
             image=self._download_id,
             user=self._api_user,
             password=self._api_password,
-            verbose=self._verbose
+            verbose=self._verbose,
+            streamlit_mode=self._streamlit_mode
         )
         download.download_xml(
             output_directory=self._download_folder,

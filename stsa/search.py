@@ -5,6 +5,7 @@ from requests.auth import HTTPBasicAuth
 import xmltodict
 import io
 
+import streamlit as st
 
 # Custom errors for download XML
 class DownloadError(Exception):
@@ -13,7 +14,7 @@ class DownloadError(Exception):
 
 class DownloadXML:
     
-    def __init__(self, image: str, user: str, password: str, verbose=False):
+    def __init__(self, image: str, user: str, password: str, verbose=False, streamlit_mode=False):
         """
         Download XML data from Copernicus Scihub API
 
@@ -21,6 +22,7 @@ class DownloadXML:
         :param user: Username for Copernicus Scihub
         :param password: Password for Copernicus Scihub
         :param verbose: Show print statements, defaults to False
+        :param streamlit_mode: Run stsa for streamlit
         """
         
         self._image = image
@@ -29,6 +31,7 @@ class DownloadXML:
         self._verbose = verbose
         self._auth = HTTPBasicAuth(self._user, self._password)
         self._url = None
+        self._streamlit_mode = streamlit_mode
         self.product_is_online = None
         self.xml_paths = []
         
@@ -57,7 +60,11 @@ class DownloadXML:
         # If product is offline exit operation
         self.product_is_online = self._check_product_is_online(link)
         if self.product_is_online is False:
-            print(f'Warning! Product {self._image} is offline! Please select another image')
+            msg = f'Warning! Product {self._image} is offline! Please select another image'
+            if self._streamlit_mode:
+                st.warning(msg)
+            else:
+                print(f'Warning! Product {self._image} is offline! Please select another image')
             return
         
         # Construct URL that shows XML files
@@ -112,12 +119,32 @@ class DownloadXML:
         
         if self._verbose is True and code == 200:
             print('Connection successful')
-        elif code > 200 and code < 300:
-            print(f'Connected to server but something went wrong. Status code: {code}')
+        elif 200 < code < 300:
+            msg = f'Connected to server but something went wrong. Status code: {code}'
+            if self._streamlit_mode:
+                st.warning(msg)
+            else:
+                print(f'Connected to server but something went wrong. Status code: {code}')
+        elif code == 401:
+            msg = f'Username and password not valid. Status code: {code}'
+            if self._streamlit_mode:
+                st.error(msg)
+                st.stop()
+            else:
+                raise DownloadError(msg)
         elif code == 404:
-            raise DownloadError(f'Could not connect to server. Status code: {code}')
+            msg = f'Could not connect to server. Status code: {code}'
+            if self._streamlit_mode:
+                st.error(msg)
+                st.stop()
+            else:
+                raise DownloadError(msg)
         else:
-            print(f'API status code: {code}')
+            msg = f'API status code: {code}'
+            if self._streamlit_mode:
+                st.warn(msg)
+            else:
+                print(msg)
         return
     
     def _check_product_is_online(self, url: str) -> bool:
@@ -148,7 +175,12 @@ class DownloadXML:
             try:
                 link = self._search_products_archive('DeletedProducts')
             except KeyError:
-                raise ValueError('XML not detected in DeletedProducts and Products archives. Check if input download scene ID is valid')
+                msg = 'Error! XML not detected in DeletedProducts and Products archives. Please check if scene ID is valid.'
+                if self._streamlit_mode:
+                    st.error(msg)
+                    st.stop()
+                else:
+                    raise ValueError(msg)
         return link
     
     def _search_products_archive(self, data_entity: str) -> str:
@@ -161,6 +193,7 @@ class DownloadXML:
         # Access API
         url = r'https://scihub.copernicus.eu/dhus/odata/v1/{}?$filter=Name%20eq%20%27{}%27'.format(data_entity, self._image)
         response = requests.get(url, auth=HTTPBasicAuth(self._user, self._password))
+        self._check_requests_status_code(response.status_code)
         xml_string = response.content
         
         # Get UUID link
