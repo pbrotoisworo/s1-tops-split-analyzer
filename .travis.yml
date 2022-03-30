@@ -6,6 +6,7 @@ python:
   - "3.6"
 before_install:
   - python --version
+  - if [[ $TRAVIS_PYTHON_VERSION == 3.7 ]]; then pip install -U pluggy; fi
   - pip install -U pip
   - pip install -U pytest
 install:
