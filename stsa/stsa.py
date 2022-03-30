@@ -145,6 +145,9 @@ class TopsSplitAnalyzer:
         # Load metadata
         self._load_metadata_paths()
 
+        # Load geometry
+        self._create_subswath_geometry()
+
         if self._verbose:
             print(f'Found {len(self.metadata_file_list)} XML paths')
 
@@ -165,6 +168,9 @@ class TopsSplitAnalyzer:
 
         # Load metadata
         self._load_metadata_paths()
+
+        # Load geometry
+        self._create_subswath_geometry()
 
         if self._verbose:
             print(f'Found {len(self.metadata_file_list)} XML paths')
@@ -227,6 +233,9 @@ class TopsSplitAnalyzer:
             
         # Load metadata
         self._load_metadata_paths()
+
+        # Load geometry
+        self._create_subswath_geometry()
 
         if self._verbose:
             print(f'Found {len(self.metadata_file_list)} XML paths')
@@ -405,8 +414,6 @@ class TopsSplitAnalyzer:
         Returns S1-TOPS-SPLIT data in JSON format
         :return: JSON
         """
-        if self.df is None:
-            self._create_subswath_geometry()
         json_data = json.loads(self.df.to_json())
         with open(output_file, 'w') as f:
             json.dump(json_data, f, indent=4)
@@ -416,8 +423,6 @@ class TopsSplitAnalyzer:
         Write shapefile of S1-TOPS-SPLIT data
         :param output_file: Path of output shapefile
         """
-        if self.df is None:
-            self._create_subswath_geometry()
         self.df.to_file(filename=output_file)
 
     def to_csv(self, output_file):
@@ -425,8 +430,6 @@ class TopsSplitAnalyzer:
         Write CSV of S1-TOPS-SPLIT data
         :param output_file: Path of output CSV file
         """
-        if self.df is None:
-            self._create_subswath_geometry()
         self.df.to_csv(output_file, index=False)
 
     def visualize_webmap(self, polygon=None):
@@ -435,10 +438,6 @@ class TopsSplitAnalyzer:
         :param polygon: Path of additional shapefile to visualize
         :return: Folium webamp
         """
-
-        if self.df is None:
-            self._create_subswath_geometry()
-
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             location_x = self.df.centroid.map(lambda p: p.x).iloc[0]
