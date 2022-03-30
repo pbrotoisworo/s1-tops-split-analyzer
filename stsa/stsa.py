@@ -19,10 +19,10 @@ from shapely.geometry import Polygon
 import pandas as pd
 
 try:
-    from search import DownloadXML
+    from search import DownloadXML, DownloadError
 except ImportError:
     # Handle import errors when testing
-    from .search import DownloadXML
+    from .search import DownloadXML, DownloadError
 
 
 class TopsSplitAnalyzer:
@@ -47,8 +47,8 @@ class TopsSplitAnalyzer:
         
         if polarization is None:
             polarization = 'vv'
-        if polarization.lower() not in ['vv', 'vh']:
-            raise ValueError(f'Input polarization "{polarization}" not recognized. Accepted is "vv" or "vh".')
+        if polarization.lower() not in ['vv', 'vh', 'hh', 'hv']:
+            raise ValueError(f'Input polarization "{polarization}" not recognized.')
         
         # Load and check user inputs
         if target_subswaths is None:
@@ -111,6 +111,32 @@ class TopsSplitAnalyzer:
             output_directory=self._download_folder,
             polarization=self.polarization
         )
+
+        if not len(download.xml_paths):
+
+            # If running in streamlit mode the app will launch a troubleshooting process to ensure
+            # continuous running of the app
+            if not self._streamlit_mode:
+                raise DownloadError('No matching XML found! Try different parameters')
+
+            print('No matching XML found! Trying again with different polarization.')
+            # If not metadata is found try one more time with other default value
+            if self.polarization == 'vv' or self.polarization == 'vh':
+                print('Vertical polarization detected. Setting polarization to "hh"')
+                self.polarization = 'hh'
+            elif self.polarization == 'hh' or self.polarization == 'hv':
+                print('Horizontal polarization detected. Setting polarization to "vv"')
+                self.polarization = 'vv'
+            
+            download.download_xml(
+                output_directory=self._download_folder,
+                polarization=self.polarization
+            )
+            if not len(download.xml_paths):
+                raise DownloadError('No XML files found after troubleshooting!')
+            else:
+                print(f'Troubleshooting method found {len(download.xml_paths)} files using "{self.polarization}" polarization')
+
         self.api_product_is_online = download.product_is_online
         self.metadata_file_list = download.xml_paths
         if self.api_product_is_online is False:
@@ -220,7 +246,7 @@ class TopsSplitAnalyzer:
             archive_files = self.archive.namelist()
 
             # Get metadata files
-            regex_filter = r's1(a|b)-iw\d-slc-(vv|vh)-.*\.xml'
+            regex_filter = r's1(?:a|b)-iw\d-slc-(?:vv|vh|hh|hv)-.*\.xml'
 
             for item in archive_files:
                 if 'calibration' in item:
