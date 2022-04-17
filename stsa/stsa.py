@@ -5,6 +5,7 @@
 
 import argparse
 import json
+import glob
 import os
 import re
 import sys
@@ -181,7 +182,7 @@ class TopsSplitAnalyzer:
     def load_safe(self, safe_path: Union[str, None] = None):
         """
         Load SAFE file containing Sentinel-1 SLC data. XML data containing
-        the burst regions iwll be loaded.
+        the burst regions will be loaded.
 
         :param safe_path: Path to the manifest.safe file inside the .SAFE
         directory.
@@ -275,10 +276,7 @@ class TopsSplitAnalyzer:
 
             # Get file list
             if self._is_manifest_safe:
-                archive_files = []
-                for path, dir_names, filenames in os.walk(self._image):
-                    for file in filenames:
-                        archive_files.append(os.path.join(path, file))
+                archive_files = glob.glob(os.path.join(self._image, 'annotation', '*.xml'), recursive=True)
             else:
                 archive_files = self.archive.namelist()
 
