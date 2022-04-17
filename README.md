@@ -42,6 +42,7 @@ CLI access is available if you directly run `stsa.py`. The available flags are:
 | --------  |:---------------------------:|
 | -v        | Print all statements        |
 | --zip     | Path of Sentinel-1 ZIP file |
+| --safe    | Path of Sentinel-1 manifest.safe file |
 | --swaths  | List of target subswaths    |
 | --polar   | Polarization                |
 | --shp     | Path of output shapefile    |
