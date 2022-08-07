@@ -1,4 +1,5 @@
 import geopandas as gpd
+from shapely.errors import WKTReadingError
 import streamlit as st
 import streamlit_folium
 
@@ -19,7 +20,8 @@ be downloaded as GeoJSON format for viewing in GIS software. To be able to acces
 Scihub account. If you don't have one you can make one [here](https://scihub.copernicus.eu/).
 
 This web app allows you to add one geometry overlay. You can create or format data into WKT strings using 
-[geojson.io](https://www.geojson.io).
+[geojson.io](https://geojson.io). Create or load your geometry then save it as WKT. Then load the WKT from the text 
+file into the text box.
 """)
 
 with st.form(key='api'):
@@ -44,6 +46,16 @@ with st.form(key='api'):
     load_button = st.form_submit_button(label='Load data')
 
 if load_button:
+    
+    # Check WKT input before connecting to API
+    if wkt_aoi:
+        try:
+            geom_overlay = gdf_from_wkt(wkt_aoi)
+        except WKTReadingError:
+            st.error('Error: Failed to parse WKT string for geometry overlay.')
+            st.stop()
+    else:
+        geom_overlay = None
 
     s1 = TopsSplitAnalyzer(streamlit_mode=True, verbose=False)
     with st.spinner('Connecting to API...'):
@@ -60,7 +72,6 @@ if load_button:
     download = st.empty()
 
     if wkt_aoi:
-        geom_overlay = gdf_from_wkt(wkt_aoi)
         df_intersect = gpd.GeoDataFrame(
             s1.intersecting_bursts(geom_overlay), columns=['subswath', 'burst']
         )
