@@ -20,9 +20,11 @@ import pandas as pd
 
 try:
     from search import DownloadXML, DownloadError
+    from utils import gdf_from_wkt
 except ImportError:
     # Handle import errors when testing
     from .search import DownloadXML, DownloadError
+    from .utils import gdf_from_wkt
 
 
 class TopsSplitAnalyzer:
@@ -388,6 +390,9 @@ class TopsSplitAnalyzer:
                 )
                 # Concat to main dataframe
                 df_all = gpd.GeoDataFrame(pd.concat([df_all, df]), crs='EPSG:4326')
+            # The index will be repeating itself if we include multiple subswaths
+            # Thus we reset it
+            df_all = df_all.reset_index(drop=True)
         else:
             # Write one subswath only
             self._load_metadata()
@@ -408,6 +413,23 @@ class TopsSplitAnalyzer:
         if self._streamlit_mode is True:
             for item in self.metadata_file_list:
                 os.remove(item)
+
+    def intersecting_bursts(self, geom):
+        """
+        Find intersecting SLC bursts numbers and their subswath according to an input
+        geometry.
+
+        :return: list
+        """
+        intersecting = []
+
+        if not isinstance(geom, gpd.GeoDataFrame):
+            geom = gpd.read_file(geom)
+
+        for i, row in self.df.iterrows():
+            if row['geometry'].intersects(geom['geometry'][0]):
+                intersecting.append((row['subswath'], row['burst']))
+        return intersecting
 
     def to_json(self, output_file):
         """
@@ -454,12 +476,13 @@ class TopsSplitAnalyzer:
             feature = folium.GeoJson(data=geom, tooltip=info).add_to(boundary)
             boundary.add_child(feature)
 
-        if polygon:
-            if self._verbose:
-                print('Loading custom shapefile:', polygon)
+        if polygon is not None:
             # Visualize additional polygon in red color
             style = {'fillColor': '#cc0000', 'color': '#cc0000'}
-            df_mask = gpd.read_file(polygon)
+            if isinstance(polygon, gpd.GeoDataFrame):
+                df_mask = polygon
+            else:
+                df_mask = gpd.read_file(polygon)
             folium.GeoJson(data=df_mask, tooltip='User loaded shapefile', style_function=lambda x: style, name='Additional Polygon').add_to(m)
             folium.LayerControl().add_to(m)
         return m
