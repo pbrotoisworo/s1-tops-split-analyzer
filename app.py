@@ -1,9 +1,10 @@
 import geopandas as gpd
+from shapely.errors import WKTReadingError
 import streamlit as st
 import streamlit_folium
 
 from stsa.stsa import TopsSplitAnalyzer
-import geopandas as gpd
+from stsa.utils import gdf_from_wkt
 
 st.set_page_config(layout="wide")
 
@@ -18,8 +19,8 @@ This web app extracts burst and subswath data from Sentinel-1 SLC data and visua
 be downloaded as GeoJSON format for viewing in GIS software. To be able to access the API please use your Copernicus
 Scihub account. If you don't have one you can make one [here](https://scihub.copernicus.eu/).
 
-This web app allows you to add one geometry overlay. You can upload any geometry that is accepted by 
-[Geopandas](https://geopandas.org/en/stable/docs/reference/api/geopandas.read_file.html).
+This web app allows you to add one geometry overlay. You can specify the overlay using Well Known Text (WKT) or 
+upload any geometry that is accepted by [Geopandas](https://geopandas.org/en/stable/docs/reference/api/geopandas.read_file.html).
 """)
 
 err_form = False
@@ -27,18 +28,34 @@ err_form = False
 scene = st.text_input(
     label='Sentinel-1 SLC scene ID'
 )
-aoi = st.file_uploader(
-label='AOI Geometry'
-)
-if aoi:
-    try:
-        geom_overlay = gpd.read_file(aoi)
-        st.success(f"File '{aoi.name}' accepted")
-    except:
-        st.error('Error: Invalid AOI file')
-        err_form = True
+aoi_type = st.selectbox('AOI input type', ['File upload', 'Well Known Text (WKT)'])
+if aoi_type == 'Well Known Text (WKT)':
+    aoi = st.text_input(
+        label='WKT of geometry overlay (optional)'
+    )
+    # Check WKT input before connecting to API
+    if aoi:
+        try:
+            geom_overlay = gdf_from_wkt(aoi)
+        except WKTReadingError:
+            st.error('Error: Failed to parse WKT string for geometry overlay.')
+            st.stop()
+    else:
+        geom_overlay = None
 else:
-    geom_overlay = None
+    aoi = st.file_uploader(
+    label='AOI Geometry (optional)',
+    help='Upload any geometry file that is accepted by Geopandas'
+    )
+    if aoi:
+        try:
+            geom_overlay = gpd.read_file(aoi)
+            st.success(f"File '{aoi.name}' accepted")
+        except:
+            st.error('Error: Invalid AOI file')
+            err_form = True
+    else:
+        geom_overlay = None
 
 col1, col2, col3 = st.columns(3)
 with col1:
