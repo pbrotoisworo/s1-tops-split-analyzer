@@ -71,9 +71,9 @@ with col3:
     pass
 
 load_button = st.button('Load SLC Scene')
-
+print("LOAD BUTTON:", load_button)
 if load_button:
-
+    print("STARTING LOAD BUTTON PROCESS")
     if err_form:
         st.error('Please fix errors before searching.')
         st.stop()
@@ -108,8 +108,10 @@ if load_button:
 
     st.subheader('Burst Data')
     download = st.empty()
-    streamlit_folium.st_folium(s1.visualize_webmap(geom_overlay), width=1200, height=800)
-    # streamlit_folium.folium_static(s1.visualize_webmap(geom_overlay), width=1200, height=800)
+    
+    # TODO: DeprecationWarning: folium_static is deprecated and will be removed in a future release, or
+    # simply replaced with with st_folium which always passes returned_objects=[] to the component.
+    streamlit_folium.folium_static(s1.visualize_webmap(geom_overlay), width=1200, height=800)
 
     filename = f'{scene}.geojson'
     download.download_button('Download GeoJSON', data=s1.df.to_json(), file_name=filename)
