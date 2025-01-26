@@ -8,3 +8,5 @@
 *.dbf
 *.cpg
 .idea/
+.ipynb
+*.xml

@@ -418,7 +418,7 @@ class TopsSplitAnalyzer:
                     crs='EPSG:4326'
                 )
                 # Concat to main dataframe
-                df_all = gpd.GeoDataFrame(pd.concat([df_all, df]), crs='EPSG:4326')
+                df_all = gpd.GeoDataFrame(pd.concat([df_all, df]))
             # The index will be repeating itself if we include multiple subswaths
             # Thus we reset it
             df_all = df_all.reset_index(drop=True)

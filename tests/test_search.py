@@ -24,7 +24,7 @@ except KeyError:
 
 data1 = {
     'SCENE_ID': 'S1B_IW_SLC__1SDV_20210817T161547_20210817T161613_028288_036013_900E',
-    'UUID': '742a9324-3375-4aef-bc96-d4a2cfd6ac42',
+    'UUID': '9605eade-9025-5399-9f5c-76660fbf4768',
     'XML_FILES': [
         's1b-iw1-slc-vh-20210817t161548-20210817t161613-028288-036013-001.xml',
         's1b-iw1-slc-vv-20210817t161548-20210817t161613-028288-036013-004.xml',
@@ -57,13 +57,14 @@ def test_get_uuid():
         user=username,
         password=password
     )
-    uuid = download._get_product_uuid_link()
-    expected = r"https://scihub.copernicus.eu/dhus/odata/v1/Products('{}')".format(data1['UUID'])
+    actual = download._get_product_uuid_link()
+    expected = r"https://download.dataspace.copernicus.eu/odata/v1/Products({})".format(data1['UUID'])
     
-    assert uuid == expected, f'Unexpected UUID. Expected {expected} got {uuid}'
+    assert actual == expected, f'Unexpected UUID. Expected {expected} got {actual}'
 
 
-@pytest.mark.skipif(found_ci_params is False, reason="Skipping because TravisCI environment parameters not found.")
+# @pytest.mark.skipif(found_ci_params is False, reason="Skipping because TravisCI environment parameters not found.")
+@pytest.mark.skip(reason="Not needed anymore. XML files are able to be accessed for old scenes even up to 2016.")
 def test_check_product_online():
     """Test if product is online or not. The test uses a dummy image as input.
     The validity of the input image will never be checked in this test.
@@ -77,14 +78,13 @@ def test_check_product_online():
     )
     
     # Value can vary between true or false
-    test_image = r"https://scihub.copernicus.eu/dhus/odata/v1/Products('b64b60da-5836-4897-ad06-5e122e7f3e50')"
+    test_image = r"https://download.dataspace.copernicus.eu/odata/v1/Products('b64b60da-5836-4897-ad06-5e122e7f3e50')"
     is_online = download._check_product_is_online(test_image)
     
     assert isinstance(is_online, bool), f'Product is {is_online} of type {type(is_online)}. But it should be a boolean.'
 
 
 @pytest.mark.skipif(found_ci_params is False, reason="Skipping because TravisCI environment parameters not found.")
-@pytest.mark.skip(reason="Copernicus takes data offline after 2 months. Currently not feasible to do this test in the long term.")
 def test_scene1():
     "Download XML files using API"
     download = DownloadXML(
@@ -92,7 +92,8 @@ def test_scene1():
         user=username,
         password=password
     )
-    download.download_xml(output_directory=TESTS_DIR)
+    download.download_xml(output_directory=TESTS_DIR, polarization='vv')
+    download.download_xml(output_directory=TESTS_DIR, polarization='vh')
     output_files = os.listdir(TESTS_DIR)
     for item in data1['XML_FILES']:
         assert item in output_files, f'Missing file! Expected {item} in output file. Output directory contains: {output_files}'
