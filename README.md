@@ -8,7 +8,7 @@
 This code intends to help users easily work with the S-1 TOPS SPLIT function in [SNAP software](https://step.esa.int/main/download/snap-download/) by parsing the XML metadata of Sentinel-1 satellite data and converting it into usable data such as shapefiles or webmaps.
 
 Using S-1 TOPS SPLIT Analyzer you are able to:
-* Download XML data directly from [Copernicus Scihub](https://scihub.copernicus.eu/) and view TOPS-SPLIT data. No need to download the full 4 GB image to view the TOPS SPLIT data
+* Download XML data directly from [Copernicus Dataspace](https://dataspace.copernicus.eu/) and view TOPS-SPLIT data. No need to download the full 4 GB image to view the TOPS SPLIT data
 * View TOPS-SPLIT data from downloaded ZIP files containing full size Sentinel-1 imagery
 * View all subswaths at the same time
 * Save S1-TOPS-SPLIT data as a shapefile, JSON, or CSV
@@ -22,13 +22,9 @@ For easier usage. STSA has a web app which is hosted by Streamlit. [Access it he
 
 # Installation
 
-This has been tested to work in Python versions 3.8 to 3.9
+This has been tested to work in Python versions 3.10
 
-**If you are using Windows you need to manually install the [GDAL](https://www.lfd.uci.edu/~gohlke/pythonlibs/#gdal) and [Fiona](https://www.lfd.uci.edu/~gohlke/pythonlibs/#fiona) wheels OR install Fiona using Anaconda**:
-
-`conda install -c conda-forge fiona`
-
-Linux or MacOS users can disregard the previous instruction. Install stsa into your environment by typing this command:
+Install STSA into your environment by typing this command:
 
 `pip install git+https://github.com/pbrotoisworo/s1-tops-split-analyzer.git`
 
@@ -76,7 +72,7 @@ s1 = stsa.TopsSplitAnalyzer(target_subswaths=['iw1', 'iw2', 'iw3'], polarization
 # METHOD 1: Load using local ZIP file
 s1.load_zip(zip_path='S1_image.zip')
 
-# METHOD 2: Load using Copernicus Scihub API
+# METHOD 2: Load using Copernicus Dataspace API
 s1.load_api(
     'myusername',
     'S1A_IW_SLC__1SDV_20210627T043102_20210627T043130_038521_048BB9_DA44',
