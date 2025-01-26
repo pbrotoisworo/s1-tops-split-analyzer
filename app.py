@@ -1,5 +1,5 @@
 import geopandas as gpd
-from shapely.errors import WKTReadingError
+from shapely.errors import ShapelyError
 import streamlit as st
 import streamlit_folium
 
@@ -17,7 +17,7 @@ Simple web app implementation of STSA. If you have issues or suggestions please 
 
 This web app extracts burst and subswath data from Sentinel-1 SLC data and visualizes on a webmap. The data itself can
 be downloaded as GeoJSON format for viewing in GIS software. To be able to access the API please use your Copernicus
-Scihub account. If you don't have one you can make one [here](https://scihub.copernicus.eu/).
+Dataspace account. If you don't have one you can make one [here](https://dataspace.copernicus.eu/).
 
 This web app allows you to add one geometry overlay. You can specify the overlay using Well Known Text (WKT) or 
 upload any geometry that is accepted by [Geopandas](https://geopandas.org/en/stable/docs/reference/api/geopandas.read_file.html).
@@ -37,7 +37,7 @@ if aoi_type == 'Well Known Text (WKT)':
     if aoi:
         try:
             geom_overlay = gdf_from_wkt(aoi)
-        except WKTReadingError:
+        except ShapelyError:
             st.error('Error: Failed to parse WKT string for geometry overlay.')
             st.stop()
     else:
@@ -60,11 +60,11 @@ else:
 col1, col2, col3 = st.columns(3)
 with col1:
     username = st.text_input(
-        label='Scihub Username'
+        label='Copernicus Dataspace Username'
     )
 with col2:
     password = st.text_input(
-        label='Scihub Password',
+        label='Copernicus Dataspace Password',
         type='password'
     )
 with col3:
@@ -108,7 +108,8 @@ if load_button:
 
     st.subheader('Burst Data')
     download = st.empty()
-    streamlit_folium.folium_static(s1.visualize_webmap(geom_overlay), width=1200, height=800)
+    streamlit_folium.st_folium(s1.visualize_webmap(geom_overlay), width=1200, height=800)
+    # streamlit_folium.folium_static(s1.visualize_webmap(geom_overlay), width=1200, height=800)
 
     filename = f'{scene}.geojson'
     download.download_button('Download GeoJSON', data=s1.df.to_json(), file_name=filename)
