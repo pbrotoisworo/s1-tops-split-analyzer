@@ -283,7 +283,7 @@ class TopsSplitAnalyzer:
                 archive_files = self.archive.namelist()
 
             # Get metadata files
-            regex_filter = r's1(?:a|b)-iw\d-slc-(?:vv|vh|hh|hv)-.*\.xml'
+            regex_filter = r's1(?:a|b|c|d)-iw\d-slc-(?:vv|vh|hh|hv)-.*\.xml'
 
             for item in archive_files:
                 if 'calibration' in item:
